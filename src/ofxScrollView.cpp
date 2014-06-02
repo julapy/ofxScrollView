@@ -41,20 +41,7 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
     }
     if(bUserInteractionEnabled == true) {
         bUserInteractionEnabled = false;
-        
-#ifdef TARGET_OPENGLES
-        ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
-        ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
-        ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-#else
-        ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
-        ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
-        ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
-#endif
-        
-    } else {
-        bUserInteractionEnabled = true;
-        
+
 #ifdef TARGET_OPENGLES
         ofRemoveListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
         ofRemoveListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
@@ -63,6 +50,19 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
         ofRemoveListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
         ofRemoveListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
         ofRemoveListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
+#endif
+        
+    } else {
+        bUserInteractionEnabled = true;
+
+#ifdef TARGET_OPENGLES
+        ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
+        ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
+        ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
+#else
+        ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
+        ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
+        ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
 #endif
     }
 }
