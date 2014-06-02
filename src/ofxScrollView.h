@@ -18,6 +18,7 @@ public:
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
     void setScrollEasing(float easing);
+    void setUserInteraction(bool bEnable);
     virtual void setup();
     
     ofRectangle transformRect(const ofRectangle & rect, const ofMatrix4x4 & mat);
@@ -41,18 +42,8 @@ public:
     virtual void zoomUp(int x, int y, int id);
     virtual void zoomCancel();
     
-    virtual void mouseMoved( int x, int y);
-    virtual void mouseDragged( int x, int y, int button);
-    virtual void mousePressed( int x, int y, int button);
-    virtual void mouseReleased(int x, int y, int button);
-    
-    virtual void touchDown(int x, int y, int id);
-    virtual void touchMoved(int x, int y, int id);
-    virtual void touchUp(int x, int y, int id);
-    virtual void touchDoubleTap(int x, int y, int id);
-    virtual void touchCancelled(int x, int y, int id);
-    
     bool bNeedsToReset = false;
+    bool bUserInteractionEnabled = false;
     
     ofRectangle windowRect;
     ofRectangle contentRect;
@@ -83,4 +74,47 @@ public:
     float scaleMin = 1.0;
     float scaleMax = 1.0;
     ofMatrix4x4 mat;
+    
+    //----------------------------------------------------------
+    virtual void mouseMoved(ofMouseEventArgs & mouse){
+        mouseMoved(mouse.x,mouse.y);
+    }
+    virtual void mouseDragged(ofMouseEventArgs & mouse){
+        mouseDragged(mouse.x,mouse.y,mouse.button);
+    }
+    virtual void mousePressed(ofMouseEventArgs & mouse){
+        mousePressed(mouse.x,mouse.y,mouse.button);
+    }
+    virtual void mouseReleased(ofMouseEventArgs & mouse){
+        mouseReleased(mouse.x,mouse.y,mouse.button);
+    }
+    
+    virtual void mouseMoved( int x, int y);
+    virtual void mouseDragged( int x, int y, int button);
+    virtual void mousePressed( int x, int y, int button);
+    virtual void mouseReleased(int x, int y, int button);
+    
+    //----------------------------------------------------------
+	virtual void touchDown(ofTouchEventArgs &touch) {
+        touchDown(touch.x, touch.y, touch.id);
+    }
+	virtual void touchMoved(ofTouchEventArgs &touch) {
+        touchMoved(touch.x, touch.y, touch.id);
+    }
+	virtual void touchUp(ofTouchEventArgs &touch) {
+        touchUp(touch.x, touch.y, touch.id);
+    }
+    virtual void touchDoubleTap(ofTouchEventArgs &touch) {
+        touchDoubleTap(touch.x, touch.y, touch.id);
+    }
+    virtual void touchCancelled(ofTouchEventArgs &touch) {
+        touchCancelled(touch.x, touch.y, touch.id);
+    }
+    
+    virtual void touchDown(int x, int y, int id);
+    virtual void touchMoved(int x, int y, int id);
+    virtual void touchUp(int x, int y, int id);
+    virtual void touchDoubleTap(int x, int y, int id);
+    virtual void touchCancelled(int x, int y, int id);
+
 };
