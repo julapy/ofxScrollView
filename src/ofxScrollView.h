@@ -18,8 +18,11 @@ public:
     virtual void setup();
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
-    void setScrollEasing(float easing);
+    void setScrollEasing(float value);
+    void setScrollPosition(float x=0, float y=0, bool bEase=true);
     void setUserInteraction(bool bEnable);
+    const ofRectangle & getWindowRect();
+    const ofRectangle & getContentRect();
     const ofMatrix4x4 & getMatrix();
     
     ofRectangle transformRect(const ofRectangle & rect, const ofMatrix4x4 & mat);

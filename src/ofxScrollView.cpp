@@ -47,8 +47,18 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
     bNeedsToReset = true;
 }
 
-void ofxScrollView::setScrollEasing(float easing) {
-    scrollEasing = easing;
+void ofxScrollView::setScrollEasing(float value) {
+    scrollEasing = value;
+}
+
+void ofxScrollView::setScrollPosition(float x, float y, bool bEase) {
+    dragCancel();
+    zoomCancel();
+
+    scroll = ofVec2f(x, y);
+    if(bEase == false) {
+        scrollEased = scroll;
+    }
 }
 
 void ofxScrollView::setUserInteraction(bool bEnable) {
@@ -81,6 +91,14 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
         ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
 #endif
     }
+}
+
+const ofRectangle & ofxScrollView::getWindowRect() {
+    return windowRect;
+}
+
+const ofRectangle & ofxScrollView::getContentRect() {
+    return contentRect;
 }
 
 const ofMatrix4x4 & ofxScrollView::getMatrix() {
@@ -307,6 +325,11 @@ void ofxScrollView::mouseMoved(int x, int y) {
 }
 
 void ofxScrollView::mousePressed(int x, int y, int button) {
+    bool bHit = windowRect.inside(x, y);
+    if(bHit == false) {
+        return;
+    }
+    
     if(button == 0) {
         dragDown(x, y, button);
     } else if(button == 2) {
