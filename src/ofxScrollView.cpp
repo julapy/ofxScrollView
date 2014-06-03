@@ -15,6 +15,22 @@ ofxScrollView::~ofxScrollView() {
 }
 
 //--------------------------------------------------------------
+void ofxScrollView::setup() {
+    if(windowRect.isEmpty() == true) {
+        windowRect.width = ofGetWidth();
+        windowRect.height = ofGetHeight();
+    }
+    
+    if(contentRect.isEmpty() == true) {
+        contentRect = windowRect;
+    }
+    
+    scaleMin = windowRect.height / (float)contentRect.height;
+    scaleMax = scaleMin * 4;
+    scale = scaleMin;
+}
+
+//--------------------------------------------------------------
 void ofxScrollView::setWindowRect(const ofRectangle & rect) {
     if(windowRect == rect) {
         return;
@@ -67,19 +83,8 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
     }
 }
 
-void ofxScrollView::setup() {
-    if(windowRect.isEmpty() == true) {
-        windowRect.width = ofGetWidth();
-        windowRect.height = ofGetHeight();
-    }
-    
-    if(contentRect.isEmpty() == true) {
-        contentRect = windowRect;
-    }
-    
-    scaleMin = windowRect.height / (float)contentRect.height;
-    scaleMax = scaleMin * 4;
-    scale = scaleMin;
+const ofMatrix4x4 & ofxScrollView::getMatrix() {
+    return mat;
 }
 
 //--------------------------------------------------------------

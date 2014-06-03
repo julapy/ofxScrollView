@@ -14,12 +14,13 @@ public:
     
     ofxScrollView();
     ~ofxScrollView();
-    
+
+    virtual void setup();
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
     void setScrollEasing(float easing);
     void setUserInteraction(bool bEnable);
-    virtual void setup();
+    const ofMatrix4x4 & getMatrix();
     
     ofRectangle transformRect(const ofRectangle & rect, const ofMatrix4x4 & mat);
     ofVec2f screenPointToContentPoint(const ofVec2f & screenPoint);
