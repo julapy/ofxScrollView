@@ -154,7 +154,7 @@ ofVec2f ofxScrollView::screenPointToContentPoint(const ofVec2f & screenPoint) {
     float px = ofMap(screenPoint.x, scrollRect.x, scrollRect.x + scrollRect.width, 0.0, 1.0, true);
     float py = ofMap(screenPoint.y, scrollRect.y, scrollRect.y + scrollRect.height, 0.0, 1.0, true);
     
-    ofVec3f contentPoint;
+    ofVec2f contentPoint;
     contentPoint.x = px * contentRect.width;
     contentPoint.y = py * contentRect.height;
     return contentPoint;
@@ -173,14 +173,14 @@ void ofxScrollView::update() {
         ofVec2f zoomDiff = zoomMoveScreenPos - zoomDownScreenPos;
         float zoomUnitDist = windowRect.width;
         float zoom = ofMap(zoomDiff.x, -zoomUnitDist, zoomUnitDist, -1.0, 1.0, true);
-        float scaleDiff = zoom;
-        scale = scaleDown + scaleDiff;
+        scale = scaleDown + zoom;
+        scale = ofClamp(scale, scaleMin, scaleMax);
         
     } else {
         
+        //
+        
     }
-    
-    scale = ofClamp(scale, scaleMin, scaleMax);
     
     //----------------------------------------------------------
     scrollSize.x = MAX((contentRect.width * scale) - windowRect.width, 0);
@@ -229,6 +229,18 @@ void ofxScrollView::update() {
     mat.preMultTranslate(ofVec3f(-offset.x, -offset.y, 0));
     mat.preMultScale(ofVec3f(scale, scale, 1.0));
     
+    if(bZooming == true) {
+        ofVec3f p0(zoomDownScreenPos.x, zoomDownScreenPos.y, 0);
+        ofVec3f p1(mat.preMult(ofVec3f(zoomDownContentPos.x, zoomDownContentPos.y, 0)));
+        ofVec3f p2 = p0 - p1;
+        
+        mat.postMultTranslate(p2);
+        
+        ofVec3f pos = mat.getTranslation();
+        scroll.x = ofMap(pos.x, 0.0, -scrollSize.x, 0.0, 1.0);
+        scroll.y = ofMap(pos.y, 0.0, -scrollSize.y, 0.0, 1.0);
+    }
+    
     scrollRect = transformRect(contentRect, mat);
     
     //----------------------------------------------------------
@@ -249,11 +261,15 @@ void ofxScrollView::end() {
 void ofxScrollView::draw() {
     if(bZooming == true) {
         
-        ofVec3f point(zoomDownContentPos.x, zoomDownContentPos.y, 0);
-        point = mat.preMult(point);
+        ofVec3f p0(zoomDownScreenPos.x, zoomDownScreenPos.y, 0);
+        
+        ofVec3f p1(zoomDownContentPos.x, zoomDownContentPos.y, 0);
+        p1 = mat.preMult(p1);
         
         ofSetColor(ofColor::red);
-        ofCircle(point, 10);
+        ofLine(p0, p1);
+        ofCircle(p0, 10);
+        ofCircle(p1, 10);
         ofSetColor(255);
     }
 }
