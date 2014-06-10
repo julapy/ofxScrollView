@@ -23,6 +23,7 @@ public:
     void setUserInteraction(bool bEnable);
     const ofRectangle & getWindowRect();
     const ofRectangle & getContentRect();
+    const ofVec2f & getScrollPosition();
     const ofMatrix4x4 & getMatrix();
     
     ofRectangle transformRect(const ofRectangle & rect, const ofMatrix4x4 & mat);

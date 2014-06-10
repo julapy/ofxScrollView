@@ -101,6 +101,10 @@ const ofRectangle & ofxScrollView::getContentRect() {
     return contentRect;
 }
 
+const ofVec2f & ofxScrollView::getScrollPosition() {
+    return scrollEased;
+}
+
 const ofMatrix4x4 & ofxScrollView::getMatrix() {
     return mat;
 }
