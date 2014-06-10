@@ -21,6 +21,7 @@ public:
     void setScrollEasing(float value);
     void setScrollPosition(float x=0, float y=0, bool bEase=true);
     void setUserInteraction(bool bEnable);
+    void setBounceBack(float value);
     const ofRectangle & getWindowRect();
     const ofRectangle & getContentRect();
     const ofVec2f & getScrollPosition();
@@ -58,6 +59,7 @@ public:
     ofVec2f scrollDown;
     ofVec2f scrollEased;
     float scrollEasing;
+    float bounceBack;
     
     ofVec2f dragDownPos;
     ofVec2f dragMovePos;

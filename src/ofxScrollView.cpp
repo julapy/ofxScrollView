@@ -11,6 +11,7 @@ ofxScrollView::ofxScrollView() {
     bUserInteractionEnabled = false;
 
     scrollEasing = 0.5;
+    bounceBack = 1.0;
     
     dragID = -1;
     bDragging = false;
@@ -111,6 +112,10 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
     }
 }
 
+void ofxScrollView::setBounceBack(float value) {
+    bounceBack = value;
+}
+
 const ofRectangle & ofxScrollView::getWindowRect() {
     return windowRect;
 }
@@ -203,8 +208,18 @@ void ofxScrollView::update() {
     }
     
     //----------------------------------------------------------
-    scroll.x = ofClamp(scroll.x, 0.0, 1.0);
-    scroll.y = ofClamp(scroll.y, 0.0, 1.0);
+    if(scroll.x < 0.0) {
+        scroll.x += (0.0 - scroll.x) * bounceBack;
+    } else if(scroll.x > 1.0) {
+        scroll.x += (1.0 - scroll.x) * bounceBack;
+    }
+
+    if(scroll.y < 0.0) {
+        scroll.y += (0.0 - scroll.y) * bounceBack;
+    } else if(scroll.y > 1.0) {
+        scroll.y += (1.0 - scroll.y) * bounceBack;
+    }
+    
     scrollEased += (scroll - scrollEased) * scrollEasing;
     
     //----------------------------------------------------------
@@ -217,8 +232,8 @@ void ofxScrollView::update() {
     scrollRect = transformRect(contentRect, mat);
     
     //----------------------------------------------------------
-    bZoomingChanged = false;
     bDraggingChanged = false;
+    bZoomingChanged = false;
 }
 
 //--------------------------------------------------------------
