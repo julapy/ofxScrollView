@@ -7,6 +7,24 @@
 
 //--------------------------------------------------------------
 ofxScrollView::ofxScrollView() {
+    bNeedsToReset = false;
+    bUserInteractionEnabled = false;
+
+    scrollEasing = 0.5;
+    
+    dragID = -1;
+    bDragging = false;
+    bDraggingChanged = false;
+    
+    zoomID = -1;
+    bZooming = false;
+    bZoomingChanged = false;
+    
+    scale = 1.0;
+    scaleDown = 1.0;
+    scaleMin = 1.0;
+    scaleMax = 1.0;
+    
     setUserInteraction(true);
 }
 
@@ -128,10 +146,8 @@ ofRectangle ofxScrollView::transformRect(const ofRectangle & rect, const ofMatri
 }
 
 ofVec2f ofxScrollView::screenPointToContentPoint(const ofVec2f & screenPoint) {
-    float px = (screenPoint.x - scrollRect.x) / scrollRect.width;
-    float py = (screenPoint.y - scrollRect.y) / scrollRect.height;
-    px = ofClamp(px, 0.0, 1.0);
-    py = ofClamp(py, 0.0, 1.0);
+    float px = ofMap(screenPoint.x, scrollRect.x, scrollRect.x + scrollRect.width, 0.0, 1.0, true);
+    float py = ofMap(screenPoint.y, scrollRect.y, scrollRect.y + scrollRect.height, 0.0, 1.0, true);
     
     ofVec3f contentPoint;
     contentPoint.x = px * contentRect.width;
@@ -151,8 +167,7 @@ void ofxScrollView::update() {
         
         ofVec2f zoomDiff = zoomMoveScreenPos - zoomDownScreenPos;
         float zoomUnitDist = windowRect.width;
-        float zoom = zoomDiff.x / zoomUnitDist;
-        zoom = MAX(MIN(zoom, 1.0), -1.0);
+        float zoom = ofMap(zoomDiff.x, -zoomUnitDist, zoomUnitDist, -1.0, 1.0, true);
         float scaleDiff = zoom;
         scale = scaleDown + scaleDiff;
         

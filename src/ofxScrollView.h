@@ -47,8 +47,8 @@ public:
     virtual void zoomUp(int x, int y, int id);
     virtual void zoomCancel();
     
-    bool bNeedsToReset = false;
-    bool bUserInteractionEnabled = false;
+    bool bNeedsToReset;
+    bool bUserInteractionEnabled;
     
     ofRectangle windowRect;
     ofRectangle contentRect;
@@ -57,27 +57,27 @@ public:
     ofVec2f scroll;
     ofVec2f scrollDown;
     ofVec2f scrollEased;
-    float scrollEasing = 0.5;
+    float scrollEasing;
     
     ofVec2f dragDownPos;
     ofVec2f dragMovePos;
     ofVec2f dragMovePosPrev;
     ofVec2f dragVel;
-    int dragID = -1;
-    bool bDragging = false;
-    bool bDraggingChanged = false;
+    int dragID;
+    bool bDragging;
+    bool bDraggingChanged;
     
     ofVec2f zoomDownScreenPos;
     ofVec2f zoomMoveScreenPos;
     ofVec2f zoomDownContentPos;
-    int zoomID = -1;
-    bool bZooming = false;
-    bool bZoomingChanged = false;
+    int zoomID;
+    bool bZooming;
+    bool bZoomingChanged;
     
-    float scale = 1.0;
-    float scaleDown = 1.0;
-    float scaleMin = 1.0;
-    float scaleMax = 1.0;
+    float scale;
+    float scaleDown;
+    float scaleMin;
+    float scaleMax;
     ofMatrix4x4 mat;
     
     //----------------------------------------------------------
