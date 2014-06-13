@@ -49,6 +49,31 @@ void ofxScrollView::setup() {
     scale = scaleMin;
 }
 
+void ofxScrollView::reset() {
+    scroll.set(0);
+    scrollDown.set(0);
+    scrollEased.set(0);
+    
+    dragDownPos.set(0);
+    dragMovePos.set(0);
+    dragMovePosPrev.set(0);
+    dragVel.set(0);
+    dragID = -1;
+    bDragging = false;
+    bDraggingChanged = false;
+    
+    zoomDownScreenPos.set(0);
+    zoomMoveScreenPos.set(0);
+    zoomDownContentPos.set(0);
+    zoomID = -1;
+    bZooming = false;
+    bZoomingChanged = false;
+    
+    scale = scaleMin;
+    scaleDown = scaleMin;
+    mat.makeIdentityMatrix();
+}
+
 //--------------------------------------------------------------
 void ofxScrollView::setWindowRect(const ofRectangle & rect) {
     if(windowRect == rect) {

@@ -16,6 +16,8 @@ public:
     ~ofxScrollView();
 
     virtual void setup();
+    virtual void reset();
+    
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
     void setScrollEasing(float value);
