@@ -7,7 +7,6 @@
 
 //--------------------------------------------------------------
 ofxScrollView::ofxScrollView() {
-    bNeedsToReset = false;
     bUserInteractionEnabled = false;
 
     scrollEasing = 0.5;
@@ -25,6 +24,7 @@ ofxScrollView::ofxScrollView() {
     scaleDown = 1.0;
     scaleMin = 1.0;
     scaleMax = 1.0;
+    scaleMultiplier = 1.0;
     
     setUserInteraction(true);
 }
@@ -43,10 +43,6 @@ void ofxScrollView::setup() {
     if(contentRect.isEmpty() == true) {
         contentRect = windowRect;
     }
-    
-    scaleMin = windowRect.height / (float)contentRect.height;
-    scaleMax = scaleMin * 4;
-    scale = scaleMin;
 }
 
 void ofxScrollView::reset() {
@@ -80,7 +76,6 @@ void ofxScrollView::setWindowRect(const ofRectangle & rect) {
         return;
     }
     windowRect = rect;
-    bNeedsToReset = true;
 }
 
 void ofxScrollView::setContentRect(const ofRectangle & rect) {
@@ -88,9 +83,31 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
         return;
     }
     contentRect = rect;
-    bNeedsToReset = true;
 }
 
+//--------------------------------------------------------------
+void ofxScrollView::setZoom(float min, float max) {
+    scaleMin = min;
+    scaleMax = min;
+    scaleMultiplier = scaleMax / scaleMin;
+    scale = ofClamp(scale, scaleMin, scaleMax);
+}
+
+void ofxScrollView::setZoomMultiplier(float value) {
+    scaleMultiplier = value;
+    scaleMax = scaleMin * scaleMultiplier;
+    scale = ofClamp(scale, scaleMin, scaleMax);
+}
+
+void ofxScrollView::setZoomContentToFitContentRect() {
+    float sx = windowRect.width / contentRect.width;
+    float sy = windowRect.height / contentRect.height;
+    scaleMin = MAX(sx, sy);
+    scaleMax = scaleMin * scaleMultiplier;
+    scale = ofClamp(scale, scaleMin, scaleMax);
+}
+
+//--------------------------------------------------------------
 void ofxScrollView::setScrollEasing(float value) {
     scrollEasing = value;
 }
@@ -187,11 +204,6 @@ ofVec2f ofxScrollView::screenPointToContentPoint(const ofVec2f & screenPoint) {
 
 //--------------------------------------------------------------
 void ofxScrollView::update() {
-    
-    if(bNeedsToReset == true) {
-        bNeedsToReset = false;
-        setup();
-    }
     
     if(bZooming == true) {
         

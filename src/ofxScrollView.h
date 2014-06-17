@@ -20,6 +20,11 @@ public:
     
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
+    
+    void setZoom(float min, float max);
+    void setZoomMultiplier(float value);
+    void setZoomContentToFitContentRect();
+    
     void setScrollEasing(float value);
     void setScrollPosition(float x=0, float y=0, bool bEase=true);
     void setUserInteraction(bool bEnable);
@@ -50,7 +55,6 @@ public:
     virtual void zoomUp(int x, int y, int id);
     virtual void zoomCancel();
     
-    bool bNeedsToReset;
     bool bUserInteractionEnabled;
     
     ofRectangle windowRect;
@@ -82,6 +86,7 @@ public:
     float scaleDown;
     float scaleMin;
     float scaleMax;
+    float scaleMultiplier;
     ofMatrix4x4 mat;
     
     //----------------------------------------------------------
