@@ -221,14 +221,30 @@ void ofxScrollView::update() {
             dragVel.y += (dragVelNew.y - dragVel.y) * 0.5;
             
             ofVec2f dragDiff = dragDownPos - dragMovePos;
-            ofVec2f scrollDiff = dragDiff / scrollSize;
+
+            ofVec2f scrollDiff(0, 0);
+            if(scrollSize.x > 0) {
+                scrollDiff.x = dragDiff.x / scrollSize.x;
+            }
+            if(scrollSize.y > 0) {
+                scrollDiff.y = dragDiff.y / scrollSize.y;
+            }
             
             scroll = scrollDown + scrollDiff;
             
         } else {
             
             dragVel *= 0.9;
-            scroll += -(dragVel / scrollSize);
+            
+            ofVec2f scrollDiff(0, 0);
+            if(scrollSize.x > 0) {
+                scrollDiff.x = dragVel.x / scrollSize.x;
+            }
+            if(scrollSize.y > 0) {
+                scrollDiff.y = dragVel.y / scrollSize.y;
+            }
+            
+            scroll -= scrollDiff;
         }
     }
     
@@ -262,8 +278,12 @@ void ofxScrollView::update() {
         mat.postMultTranslate(p2);
         
         ofVec3f pos = mat.getTranslation();
-        scroll.x = ofMap(pos.x, 0.0, -scrollSize.x, 0.0, 1.0);
-        scroll.y = ofMap(pos.y, 0.0, -scrollSize.y, 0.0, 1.0);
+        if(scrollSize.x > 0) {
+            scroll.x = ofMap(pos.x, 0.0, -scrollSize.x, 0.0, 1.0);
+        }
+        if(scrollSize.y > 0) {
+            scroll.y = ofMap(pos.y, 0.0, -scrollSize.y, 0.0, 1.0);
+        }
     }
     
     scrollRect = transformRect(contentRect, mat);
