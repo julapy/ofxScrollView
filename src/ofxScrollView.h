@@ -21,9 +21,11 @@ public:
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
     
-    void setZoom(float min, float max);
+    void setZoomMinMax(float min, float max);
     void setZoomMultiplier(float value);
     void setZoomContentToFitContentRect();
+    void setZoom(float value);
+    float getZoom();
     
     void setScrollEasing(float value);
     void setScrollPosition(float x=0, float y=0, bool bEase=true);

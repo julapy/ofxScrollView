@@ -86,7 +86,7 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::setZoom(float min, float max) {
+void ofxScrollView::setZoomMinMax(float min, float max) {
     scaleMin = min;
     scaleMax = min;
     scaleMultiplier = scaleMax / scaleMin;
@@ -105,6 +105,14 @@ void ofxScrollView::setZoomContentToFitContentRect() {
     scaleMin = MAX(sx, sy);
     scaleMax = scaleMin * scaleMultiplier;
     scale = ofClamp(scale, scaleMin, scaleMax);
+}
+
+void ofxScrollView::setZoom(float value) {
+    scale = ofClamp(value, scaleMin, scaleMax);
+}
+
+float ofxScrollView::getZoom() {
+    return scale;
 }
 
 //--------------------------------------------------------------
