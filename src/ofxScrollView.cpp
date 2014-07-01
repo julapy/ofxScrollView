@@ -471,15 +471,26 @@ void ofxScrollView::mouseReleased(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofxScrollView::touchDown(int x, int y, int id) {
-    //
+    bool bHit = windowRect.inside(x, y);
+    if(bHit == false) {
+        return;
+    }
+    
+    if(id == 0) {
+        dragDown(x, y, id);
+    }
 }
 
 void ofxScrollView::touchMoved(int x, int y, int id) {
-    //
+    if(id == 0) {
+        dragMoved(x, y, id);
+    }
 }
 
 void ofxScrollView::touchUp(int x, int y, int id) {
-    //
+    if(id == 0) {
+        dragUp(x, y, id);
+    }
 }
 
 void ofxScrollView::touchDoubleTap(int x, int y, int id) {
