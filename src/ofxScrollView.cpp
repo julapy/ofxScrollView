@@ -115,6 +115,18 @@ float ofxScrollView::getZoom() {
     return scale;
 }
 
+float ofxScrollView::getZoomMin() {
+    return scaleMin;
+}
+
+float ofxScrollView::getZoomMax() {
+    return scaleMax;
+}
+
+bool ofxScrollView::isZoomed() {
+    return (scale > scaleMin);
+}
+
 //--------------------------------------------------------------
 void ofxScrollView::setScrollEasing(float value) {
     scrollEasing = value;

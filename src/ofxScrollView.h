@@ -26,6 +26,9 @@ public:
     void setZoomContentToFitContentRect();
     void setZoom(float value);
     float getZoom();
+    float getZoomMin();
+    float getZoomMax();
+    bool isZoomed();
     
     void setScrollEasing(float value);
     void setScrollPosition(float x=0, float y=0, bool bEase=true);
