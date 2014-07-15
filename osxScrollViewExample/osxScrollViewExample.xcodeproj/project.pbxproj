@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6707A5C9197512A600332309 /* ofxScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6707A5C7197512A600332309 /* ofxScrollView.cpp */; };
+		6707A5CC197514BE00332309 /* Grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6707A5CA197514BE00332309 /* Grid.cpp */; };
 		67C8859018167DD30046C13D /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67C8858E18167DD30046C13D /* ofApp.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
@@ -60,6 +62,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6707A5C7197512A600332309 /* ofxScrollView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxScrollView.cpp; sourceTree = "<group>"; };
+		6707A5C8197512A600332309 /* ofxScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxScrollView.h; sourceTree = "<group>"; };
+		6707A5CA197514BE00332309 /* Grid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grid.cpp; sourceTree = "<group>"; };
+		6707A5CB197514BE00332309 /* Grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grid.h; sourceTree = "<group>"; };
 		67C8858E18167DD30046C13D /* ofApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofApp.cpp; sourceTree = "<group>"; };
 		67C8858F18167DD30046C13D /* ofApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofApp.h; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
@@ -117,8 +123,19 @@
 		6707A5C119750B9000332309 /* ofxScrollView */ = {
 			isa = PBXGroup;
 			children = (
+				6707A5C6197512A600332309 /* src */,
 			);
 			name = ofxScrollView;
+			path = ../../../addons/ofxScrollView;
+			sourceTree = "<group>";
+		};
+		6707A5C6197512A600332309 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				6707A5C8197512A600332309 /* ofxScrollView.h */,
+				6707A5C7197512A600332309 /* ofxScrollView.cpp */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		BB4B014C10F69532006C3DED /* addons */ = {
@@ -195,6 +212,8 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				67C8858F18167DD30046C13D /* ofApp.h */,
 				67C8858E18167DD30046C13D /* ofApp.cpp */,
+				6707A5CB197514BE00332309 /* Grid.h */,
+				6707A5CA197514BE00332309 /* Grid.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -297,6 +316,8 @@
 			files = (
 				67C8859018167DD30046C13D /* ofApp.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
+				6707A5C9197512A600332309 /* ofxScrollView.cpp in Sources */,
+				6707A5CC197514BE00332309 /* Grid.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
