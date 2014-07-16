@@ -1,6 +1,7 @@
 //
 //  ofxScrollView.cpp
 //  Created by Lukasz Karluk on 2/06/2014.
+//  http://julapy.com/
 //
 
 #include "ofxScrollView.h"
@@ -36,12 +37,11 @@ ofxScrollView::~ofxScrollView() {
 //--------------------------------------------------------------
 void ofxScrollView::setup() {
     if(windowRect.isEmpty() == true) {
-        windowRect.width = ofGetWidth();
-        windowRect.height = ofGetHeight();
+        setWindowRect(ofRectangle(0, 0, ofGetWidth(), ofGetHeight()));
     }
     
     if(contentRect.isEmpty() == true) {
-        contentRect = windowRect;
+        setContentRect(windowRect);
     }
 }
 

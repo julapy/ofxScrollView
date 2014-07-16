@@ -1,6 +1,7 @@
 //
 //  ofxScrollView.h
 //  Created by Lukasz Karluk on 2/06/2014.
+//  http://julapy.com/
 //
 
 #pragma once
