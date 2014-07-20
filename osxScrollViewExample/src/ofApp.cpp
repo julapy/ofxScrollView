@@ -11,9 +11,10 @@ void ofApp::setup(){
     
     scrollView.setWindowRect(windowRect);
     scrollView.setContentRect(contentRect);
-//    scrollView.setZoomMultiplier(3.0);
+    scrollView.setZoomMultiplier(3.0);
     scrollView.setZoomContentToFitContentRect();
-    scrollView.setScrollEasing(0.3); // smoothness of scrolling.
+    scrollView.setZoomEasing(0.3); // smoothness of zooming, between 0 and 1.
+    scrollView.setScrollEasing(0.3); // smoothness of scrolling, between 0 and 1.
     scrollView.setBounceBack(0.3); // the speed of bounce back, between 0 and 1.
     scrollView.setUserInteraction(true); // enable / disable mouse or touch interaction.
     scrollView.setup();
@@ -21,6 +22,13 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
+    if(bDoubleTap == true) {
+        bDoubleTap = false;
+        
+        
+    }
+    
     scrollView.update();
 }
 
@@ -38,6 +46,8 @@ void ofApp::draw(){
     grid.draw();
     
     scrollView.end();
+    
+    scrollView.draw();
 }
 
 //--------------------------------------------------------------
@@ -62,7 +72,17 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+    
+    ofVec2f touchPointNew(x, y);
+    ofVec2f touchPointDiff = touchPointNew - touchPoint;
+    touchPoint = touchPointNew;
+    
+    float touchTimeNow = ofGetElapsedTimef();
+    float touchTimeDiff = touchTimeNow - touchTime;
+    
+    bDoubleTap = true;
+    bDoubleTap = bDoubleTap && (touchTimeDiff < 0.2);
+    bDoubleTap = bDoubleTap && (touchPointDiff.length() < 10);
 }
 
 //--------------------------------------------------------------

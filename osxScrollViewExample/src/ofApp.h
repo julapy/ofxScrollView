@@ -29,4 +29,8 @@ public:
     
     Grid grid;
     
+    ofVec2f touchPoint;
+    float touchTime = 0.0;
+    bool bDoubleTap = false;
+    
 };

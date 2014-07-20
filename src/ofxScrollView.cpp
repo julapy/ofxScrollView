@@ -22,6 +22,8 @@ ofxScrollView::ofxScrollView() {
     bZoomingChanged = false;
     
     scale = 1.0;
+    scaleEased = 1.0;
+    scaleEasing = 0.5;
     scaleDown = 1.0;
     scaleMin = 1.0;
     scaleMax = 1.0;
@@ -46,9 +48,9 @@ void ofxScrollView::setup() {
 }
 
 void ofxScrollView::reset() {
-    scroll.set(0);
-    scrollDown.set(0);
-    scrollEased.set(0);
+    scrollPos.set(0);
+    scrollPosEased.set(0);
+    scrollPosDown.set(0);
     
     dragDownPos.set(0);
     dragMovePos.set(0);
@@ -90,13 +92,13 @@ void ofxScrollView::setZoomMinMax(float min, float max) {
     scaleMin = min;
     scaleMax = min;
     scaleMultiplier = scaleMax / scaleMin;
-    scale = ofClamp(scale, scaleMin, scaleMax);
+    scale = scaleEased = ofClamp(scale, scaleMin, scaleMax);
 }
 
 void ofxScrollView::setZoomMultiplier(float value) {
     scaleMultiplier = value;
     scaleMax = scaleMin * scaleMultiplier;
-    scale = ofClamp(scale, scaleMin, scaleMax);
+    scale = scaleEased = ofClamp(scale, scaleMin, scaleMax);
 }
 
 void ofxScrollView::setZoomContentToFitContentRect() {
@@ -104,11 +106,15 @@ void ofxScrollView::setZoomContentToFitContentRect() {
     float sy = windowRect.height / contentRect.height;
     scaleMin = MAX(sx, sy);
     scaleMax = scaleMin * scaleMultiplier;
-    scale = ofClamp(scale, scaleMin, scaleMax);
+    scale = scaleEased = ofClamp(scale, scaleMin, scaleMax);
 }
 
 void ofxScrollView::setZoom(float value) {
-    scale = ofClamp(value, scaleMin, scaleMax);
+    scale = scaleEased = ofClamp(value, scaleMin, scaleMax);
+}
+
+void ofxScrollView::setZoomEasing(float value) {
+    scaleEasing = value;
 }
 
 float ofxScrollView::getZoom() {
@@ -127,6 +133,18 @@ bool ofxScrollView::isZoomed() {
     return (scale > scaleMin);
 }
 
+void ofxScrollView::zoomTo(const ofVec2f & pos, float zoom) {
+    //
+}
+
+void ofxScrollView::zoomMinTo(const ofVec2f & pos) {
+    //
+}
+
+void ofxScrollView::zoomMaxTo(const ofVec2f & pos) {
+    //
+}
+
 //--------------------------------------------------------------
 void ofxScrollView::setScrollEasing(float value) {
     scrollEasing = value;
@@ -136,9 +154,9 @@ void ofxScrollView::setScrollPosition(float x, float y, bool bEase) {
     dragCancel();
     zoomCancel();
 
-    scroll = ofVec2f(x, y);
+    scrollPos = ofVec2f(x, y);
     if(bEase == false) {
-        scrollEased = scroll;
+        scrollPosEased = scrollPos;
     }
 }
 
@@ -187,7 +205,7 @@ const ofRectangle & ofxScrollView::getContentRect() {
 }
 
 const ofVec2f & ofxScrollView::getScrollPosition() {
-    return scrollEased;
+    return scrollPosEased;
 }
 
 const ofMatrix4x4 & ofxScrollView::getMatrix() {
@@ -195,30 +213,20 @@ const ofMatrix4x4 & ofxScrollView::getMatrix() {
 }
 
 //--------------------------------------------------------------
-ofRectangle ofxScrollView::transformRect(const ofRectangle & rect, const ofMatrix4x4 & mat) {
-    ofRectangle r;
-    r = rect;
-    
-    ofVec3f p0(r.x, r.y, 0);
-    ofVec3f p1(r.x + r.width, r.y + r.height, 0);
-    p0 = mat.preMult(p0);
-    p1 = mat.preMult(p1);
-    
-    r.x = p0.x;
-    r.y = p0.y;
-    r.width = p1.x - p0.x;
-    r.height = p1.y - p0.y;
-    
-    return r;
-}
-
 ofVec2f ofxScrollView::screenPointToContentPoint(const ofVec2f & screenPoint) {
-    float px = ofMap(screenPoint.x, scrollRect.x, scrollRect.x + scrollRect.width, 0.0, 1.0, true);
-    float py = ofMap(screenPoint.y, scrollRect.y, scrollRect.y + scrollRect.height, 0.0, 1.0, true);
-    
     ofVec2f contentPoint;
-    contentPoint.x = px * contentRect.width;
-    contentPoint.y = py * contentRect.height;
+    contentPoint.x = ofMap(screenPoint.x,
+                           scrollRect.x,
+                           scrollRect.x + scrollRect.width,
+                           0,
+                           contentRect.width,
+                           true);
+    contentPoint.y = ofMap(screenPoint.y,
+                           scrollRect.y,
+                           scrollRect.y + scrollRect.height,
+                           0,
+                           contentRect.height,
+                           true);
     return contentPoint;
 }
 
@@ -228,80 +236,77 @@ void ofxScrollView::update() {
     if(bZooming == true) {
         
         ofVec2f zoomDiff = zoomMoveScreenPos - zoomDownScreenPos;
-        float zoomUnitDist = windowRect.width;
-        float zoom = ofMap(zoomDiff.x, -zoomUnitDist, zoomUnitDist, -1.0, 1.0, true);
+        float zoomUnitDist = ofVec2f(windowRect.width, windowRect.height).length(); // diagonal.
+        float zoomRange = scaleMax - scaleMin;
+        float zoom = ofMap(zoomDiff.x, -zoomUnitDist, zoomUnitDist, -zoomRange, zoomRange, true);
         scale = scaleDown + zoom;
-        scale = ofClamp(scale, scaleMin, scaleMax);
-        
-    } else {
-        
-        //
-        
+        scale = MAX(scale, 0.0);
     }
     
+    bool bContainZoom = true;
+    bContainZoom = bContainZoom && (bZooming == false);
+
+    if(bContainZoom == true) {
+        scale = ofClamp(scale, scaleMin, scaleMax);
+    }
+    
+    scaleEased += (scale - scaleEased) * scaleEasing;
+    
     //----------------------------------------------------------
-    scrollSize.x = MAX((contentRect.width * scale) - windowRect.width, 0);
-    scrollSize.y = MAX((contentRect.height * scale) - windowRect.height, 0);
+    scrollRect.width = contentRect.width * scaleEased;
+    scrollRect.height = contentRect.height * scaleEased;
     
     //----------------------------------------------------------
     if(bZooming == false) {
         if(bDragging == true) {
             
-            ofVec2f dragVelNew = dragMovePos - dragMovePosPrev;
+            dragVel = dragMovePos - dragMovePosPrev;
             dragMovePosPrev = dragMovePos;
-            dragVel.x += (dragVelNew.x - dragVel.x) * 0.5;
-            dragVel.y += (dragVelNew.y - dragVel.y) * 0.5;
-            
-            ofVec2f dragDiff = dragDownPos - dragMovePos;
-
-            ofVec2f scrollDiff(0, 0);
-            if(scrollSize.x > 0) {
-                scrollDiff.x = dragDiff.x / scrollSize.x;
-            }
-            if(scrollSize.y > 0) {
-                scrollDiff.y = dragDiff.y / scrollSize.y;
-            }
-            
-            scroll = scrollDown + scrollDiff;
+            scrollPos += dragVel;
             
         } else {
             
             dragVel *= 0.9;
-            
-            ofVec2f scrollDiff(0, 0);
-            if(scrollSize.x > 0) {
-                scrollDiff.x = dragVel.x / scrollSize.x;
-            }
-            if(scrollSize.y > 0) {
-                scrollDiff.y = dragVel.y / scrollSize.y;
-            }
-            
-            scroll -= scrollDiff;
+            scrollPos += dragVel;
         }
     }
     
     //----------------------------------------------------------
-    if(scroll.x < 0.0) {
-        scroll.x += (0.0 - scroll.x) * bounceBack;
-    } else if(scroll.x > 1.0) {
-        scroll.x += (1.0 - scroll.x) * bounceBack;
-    }
-
-    if(scroll.y < 0.0) {
-        scroll.y += (0.0 - scroll.y) * bounceBack;
-    } else if(scroll.y > 1.0) {
-        scroll.y += (1.0 - scroll.y) * bounceBack;
+    bool bContainPosition = true;
+    bContainPosition = bContainPosition && (bDragging == false);
+    bContainPosition = bContainPosition && (bZooming == false);
+    
+    if(bContainPosition == true) {
+        
+        float x0 = windowRect.x - MAX(scrollRect.width - windowRect.width, 0.0);
+        float x1 = windowRect.x;
+        float y0 = windowRect.y - MAX(scrollRect.height - windowRect.height, 0.0);
+        float y1 = windowRect.y;
+        
+        if(scrollPos.x < x0) {
+            scrollPos.x += (x0 - scrollPos.x) * bounceBack;
+        } else if(scrollPos.x > x1) {
+            scrollPos.x += (x1 - scrollPos.x) * bounceBack;
+        }
+        
+        if(scrollPos.y < y0) {
+            scrollPos.y += (y0 - scrollPos.y) * bounceBack;
+        } else if(scrollPos.y > y1) {
+            scrollPos.y += (y1 - scrollPos.y) * bounceBack;
+        }
     }
     
-    scrollEased += (scroll - scrollEased) * scrollEasing;
+    scrollPosEased += (scrollPos - scrollPosEased) * scrollEasing;
+    
+    scrollRect.x = scrollPosEased.x;
+    scrollRect.y = scrollPosEased.y;
     
     //----------------------------------------------------------
     
-    ofVec2f offset = scrollSize * scrollEased;
     mat.makeIdentityMatrix();
-    mat.preMultTranslate(ofVec3f(-offset.x, -offset.y, 0));
-    mat.preMultScale(ofVec3f(scale, scale, 1.0));
-    
+    mat.preMultTranslate(scrollPosEased);
+    mat.preMultScale(ofVec3f(scaleEased, scaleEased, 1.0));
+
     if(bZooming == true) {
         ofVec3f p0(zoomDownScreenPos.x, zoomDownScreenPos.y, 0);
         ofVec3f p1(mat.preMult(ofVec3f(zoomDownContentPos.x, zoomDownContentPos.y, 0)));
@@ -310,15 +315,8 @@ void ofxScrollView::update() {
         mat.postMultTranslate(p2);
         
         ofVec3f pos = mat.getTranslation();
-        if(scrollSize.x > 0) {
-            scroll.x = ofMap(pos.x, 0.0, -scrollSize.x, 0.0, 1.0);
-        }
-        if(scrollSize.y > 0) {
-            scroll.y = ofMap(pos.y, 0.0, -scrollSize.y, 0.0, 1.0);
-        }
+        scrollPos = pos;
     }
-    
-    scrollRect = transformRect(contentRect, mat);
     
     //----------------------------------------------------------
     bDraggingChanged = false;
@@ -366,7 +364,7 @@ void ofxScrollView::dragDown(int x, int y, int id) {
     dragDownPos = dragMovePos = dragMovePosPrev = ofVec2f(x, y);
     dragVel.set(0);
     
-    scrollDown = scroll;
+    scrollPosDown = scrollPos;
     
     bDragging = true;
     bDraggingChanged = true;
@@ -411,7 +409,7 @@ void ofxScrollView::zoomDown(int x, int y, int id) {
     zoomDownScreenPos = zoomMoveScreenPos = ofVec2f(x, y);
     zoomDownContentPos = screenPointToContentPoint(zoomDownScreenPos);
     
-    scrollDown = scroll;
+    scrollPosDown = scrollPos;
     scaleDown = scale;
     
     bZooming = true;

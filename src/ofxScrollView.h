@@ -26,10 +26,15 @@ public:
     void setZoomMultiplier(float value);
     void setZoomContentToFitContentRect();
     void setZoom(float value);
+    void setZoomEasing(float value);
     float getZoom();
     float getZoomMin();
     float getZoomMax();
     bool isZoomed();
+
+    void zoomTo(const ofVec2f & pos, float zoom);
+    void zoomMinTo(const ofVec2f & pos);
+    void zoomMaxTo(const ofVec2f & pos);
     
     void setScrollEasing(float value);
     void setScrollPosition(float x=0, float y=0, bool bEase=true);
@@ -40,7 +45,6 @@ public:
     const ofVec2f & getScrollPosition();
     const ofMatrix4x4 & getMatrix();
     
-    ofRectangle transformRect(const ofRectangle & rect, const ofMatrix4x4 & mat);
     ofVec2f screenPointToContentPoint(const ofVec2f & screenPoint);
     
     virtual void update();
@@ -65,11 +69,11 @@ public:
     
     ofRectangle windowRect;
     ofRectangle contentRect;
+
     ofRectangle scrollRect;
-    ofVec2f scrollSize;
-    ofVec2f scroll;
-    ofVec2f scrollDown;
-    ofVec2f scrollEased;
+    ofVec2f scrollPos;
+    ofVec2f scrollPosEased;
+    ofVec2f scrollPosDown;
     float scrollEasing;
     float bounceBack;
     
@@ -89,6 +93,8 @@ public:
     bool bZoomingChanged;
     
     float scale;
+    float scaleEased;
+    float scaleEasing;
     float scaleDown;
     float scaleMin;
     float scaleMax;
