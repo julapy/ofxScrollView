@@ -23,12 +23,6 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    if(bDoubleTap == true) {
-        bDoubleTap = false;
-        
-        
-    }
-    
     scrollView.update();
 }
 
@@ -79,10 +73,22 @@ void ofApp::mousePressed(int x, int y, int button){
     
     float touchTimeNow = ofGetElapsedTimef();
     float touchTimeDiff = touchTimeNow - touchTime;
+    touchTime = touchTimeNow;
     
-    bDoubleTap = true;
+    bool bDoubleTap = true;
     bDoubleTap = bDoubleTap && (touchTimeDiff < 0.2);
     bDoubleTap = bDoubleTap && (touchPointDiff.length() < 10);
+    
+    if(bDoubleTap == true) {
+        float zoomTimeSec = 1.2;
+        bool bZoomed = scrollView.isZoomed();
+        if(bZoomed == true) {
+            scrollView.zoomToMin(touchPoint, zoomTimeSec);
+        } else {
+            scrollView.zoomToMax(touchPoint, zoomTimeSec);
+        }
+        
+    }
 }
 
 //--------------------------------------------------------------
