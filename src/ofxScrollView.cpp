@@ -347,7 +347,7 @@ void ofxScrollView::update() {
     
     //----------------------------------------------------------
     bool bContainPosition = true;
-    bContainPosition = bContainPosition && (bDragging == false);
+//    bContainPosition = bContainPosition && (bDragging == false);
     bContainPosition = bContainPosition && (bZooming == false);
     
     if(bContainPosition == true) {
