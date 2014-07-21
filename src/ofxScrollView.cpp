@@ -7,6 +7,9 @@
 #include "ofxScrollView.h"
 
 //--------------------------------------------------------------
+static float const kEasingStop = 0.001;
+
+//--------------------------------------------------------------
 ofxScrollView::ofxScrollView() {
     bUserInteractionEnabled = false;
 
@@ -27,8 +30,6 @@ ofxScrollView::ofxScrollView() {
     bZoomingAnimatedFinished = false;
     
     scale = 1.0;
-    scaleEased = 1.0;
-    scaleEasing = 0.5;
     scaleDown = 1.0;
     scaleMin = 1.0;
     scaleMax = 1.0;
@@ -102,13 +103,13 @@ void ofxScrollView::setZoomMinMax(float min, float max) {
     scaleMin = min;
     scaleMax = min;
     scaleMultiplier = scaleMax / scaleMin;
-    scale = scaleEased = ofClamp(scale, scaleMin, scaleMax);
+    scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
 void ofxScrollView::setZoomMultiplier(float value) {
     scaleMultiplier = value;
     scaleMax = scaleMin * scaleMultiplier;
-    scale = scaleEased = ofClamp(scale, scaleMin, scaleMax);
+    scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
 void ofxScrollView::setZoomContentToFitContentRect() {
@@ -116,15 +117,11 @@ void ofxScrollView::setZoomContentToFitContentRect() {
     float sy = windowRect.height / contentRect.height;
     scaleMin = MAX(sx, sy);
     scaleMax = scaleMin * scaleMultiplier;
-    scale = scaleEased = ofClamp(scale, scaleMin, scaleMax);
+    scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
 void ofxScrollView::setZoom(float value) {
-    scale = scaleEased = ofClamp(value, scaleMin, scaleMax);
-}
-
-void ofxScrollView::setZoomEasing(float value) {
-    scaleEasing = value;
+    scale = ofClamp(value, scaleMin, scaleMax);
 }
 
 float ofxScrollView::getZoom() {
@@ -145,6 +142,7 @@ bool ofxScrollView::isZoomed() {
 
 //--------------------------------------------------------------
 void ofxScrollView::zoomTo(const ofVec2f & pos, float zoom, float timeSec) {
+    dragCancel();
     zoomDown(pos.x, pos.y, 0);
     
     zoomAnimatedTarget = ofClamp(zoom, scaleMin, scaleMax);
@@ -272,14 +270,16 @@ void ofxScrollView::update() {
     bContainZoom = bContainZoom && (bZooming == false);
 
     if(bContainZoom == true) {
-        scale = ofClamp(scale, scaleMin, scaleMax);
+        if(scale < scaleMin) {
+            scale = scaleMin;
+        } else if(scale > scaleMax) {
+            scale = scaleMax;
+        }
     }
     
-    scaleEased += (scale - scaleEased) * scaleEasing;
-    
     //----------------------------------------------------------
-    scrollRect.width = contentRect.width * scaleEased;
-    scrollRect.height = contentRect.height * scaleEased;
+    scrollRect.width = contentRect.width * scale;
+    scrollRect.height = contentRect.height * scale;
     
     //----------------------------------------------------------
     if(bZooming == false) {
@@ -292,7 +292,18 @@ void ofxScrollView::update() {
         } else {
             
             dragVel *= 0.9;
-            scrollPos += dragVel;
+            if(ABS(dragVel.x) < kEasingStop) {
+                dragVel.x = 0;
+            }
+            if(ABS(dragVel.y) < kEasingStop) {
+                dragVel.y = 0;
+            }
+            bool bAddVel = true;
+            bAddVel = bAddVel && (dragVel.x > 0);
+            bAddVel = bAddVel && (dragVel.y > 0);
+            if(bAddVel == true) {
+                scrollPos += dragVel;
+            }
         }
     }
     
@@ -310,18 +321,38 @@ void ofxScrollView::update() {
         
         if(scrollPos.x < x0) {
             scrollPos.x += (x0 - scrollPos.x) * bounceBack;
+            if(ABS(x0 - scrollPos.x) < kEasingStop) {
+                scrollPos.x = x0;
+            }
         } else if(scrollPos.x > x1) {
             scrollPos.x += (x1 - scrollPos.x) * bounceBack;
+            if(ABS(x1 - scrollPos.x) < kEasingStop) {
+                scrollPos.x = x1;
+            }
         }
         
         if(scrollPos.y < y0) {
             scrollPos.y += (y0 - scrollPos.y) * bounceBack;
+            if(ABS(y0 - scrollPos.y) < kEasingStop) {
+                scrollPos.y = y0;
+            }
         } else if(scrollPos.y > y1) {
             scrollPos.y += (y1 - scrollPos.y) * bounceBack;
+            if(ABS(y1 - scrollPos.y) < kEasingStop) {
+                scrollPos.y = y1;
+            }
         }
     }
     
+    //----------------------------------------------------------
     scrollPosEased += (scrollPos - scrollPosEased) * scrollEasing;
+
+    if(ABS(scrollPos.x - scrollPosEased.x) < kEasingStop) {
+        scrollPosEased.x = scrollPos.x;
+    }
+    if(ABS(scrollPos.y - scrollPosEased.y) < kEasingStop) {
+        scrollPosEased.y = scrollPos.y;
+    }
     
     scrollRect.x = scrollPosEased.x;
     scrollRect.y = scrollPosEased.y;
@@ -330,7 +361,7 @@ void ofxScrollView::update() {
     
     mat.makeIdentityMatrix();
     mat.preMultTranslate(scrollPosEased);
-    mat.preMultScale(ofVec3f(scaleEased, scaleEased, 1.0));
+    mat.preMultScale(ofVec3f(scale, scale, 1.0));
 
     if(bZooming == true) {
         ofVec3f p0(zoomDownScreenPos.x, zoomDownScreenPos.y, 0);
@@ -338,9 +369,11 @@ void ofxScrollView::update() {
         ofVec3f p2 = p0 - p1;
         
         mat.postMultTranslate(p2);
+        scrollPos = scrollPosEased = mat.getTranslation();
         
-        ofVec3f pos = mat.getTranslation();
-        scrollPos = pos;
+    } else {
+        
+        //
     }
     
     //----------------------------------------------------------
@@ -348,9 +381,9 @@ void ofxScrollView::update() {
     bZoomingChanged = false;
     
     if(bZoomingAnimatedFinished == true) {
+        bZoomingAnimatedFinished = false;
         zoomCancel();
     }
-    bZoomingAnimatedFinished = false;
 }
 
 //--------------------------------------------------------------
@@ -445,6 +478,7 @@ void ofxScrollView::zoomDown(int x, int y, int id) {
     
     bZooming = true;
     bZoomingChanged = true;
+    bZoomingAnimated = false;
 }
 
 void ofxScrollView::zoomMoved(int x, int y, int id) {

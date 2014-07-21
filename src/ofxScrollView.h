@@ -26,7 +26,6 @@ public:
     void setZoomMultiplier(float value);
     void setZoomContentToFitContentRect();
     void setZoom(float value);
-    void setZoomEasing(float value);
     float getZoom();
     float getZoomMin();
     float getZoomMax();
@@ -96,8 +95,6 @@ public:
     bool bZoomingAnimatedFinished;
     
     float scale;
-    float scaleEased;
-    float scaleEasing;
     float scaleDown;
     float scaleMin;
     float scaleMax;

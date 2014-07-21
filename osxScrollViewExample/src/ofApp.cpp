@@ -2,7 +2,11 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    
+    ofSetFrameRate(60);
+    ofSetLogLevel(OF_LOG_NOTICE);
 
+    //----------------------------------------------------------
     windowRect.width = ofGetWidth();
     windowRect.height = ofGetHeight();
     
@@ -13,7 +17,6 @@ void ofApp::setup(){
     scrollView.setContentRect(contentRect);
     scrollView.setZoomMultiplier(3.0);
     scrollView.setZoomContentToFitContentRect();
-    scrollView.setZoomEasing(0.3); // smoothness of zooming, between 0 and 1.
     scrollView.setScrollEasing(0.3); // smoothness of scrolling, between 0 and 1.
     scrollView.setBounceBack(0.3); // the speed of bounce back, between 0 and 1.
     scrollView.setUserInteraction(true); // enable / disable mouse or touch interaction.
@@ -80,14 +83,15 @@ void ofApp::mousePressed(int x, int y, int button){
     bDoubleTap = bDoubleTap && (touchPointDiff.length() < 10);
     
     if(bDoubleTap == true) {
-        float zoomTimeSec = 1.2;
+        ofLog(OF_LOG_NOTICE, "double tap " + ofToString(ofGetFrameNum()));
+        
+        float zoomTimeSec = 5.0;
         bool bZoomed = scrollView.isZoomed();
         if(bZoomed == true) {
             scrollView.zoomToMin(touchPoint, zoomTimeSec);
         } else {
             scrollView.zoomToMax(touchPoint, zoomTimeSec);
         }
-        
     }
 }
 
