@@ -16,14 +16,12 @@ ofxScrollView::ofxScrollView() {
     scrollEasing = 0.5;
     bounceBack = 1.0;
     
-    dragID = -1;
     bDragging = false;
     bDraggingChanged = false;
     
     zoomAnimatedTimeStart = 0;
     zoomAnimatedTimeTotal = 0;
     zoomAnimatedTarget = 0;
-    zoomID = -1;
     bZooming = false;
     bZoomingChanged = false;
     bZoomingAnimated = false;
@@ -63,7 +61,6 @@ void ofxScrollView::reset() {
     dragMovePos.set(0);
     dragMovePosPrev.set(0);
     dragVel.set(0);
-    dragID = -1;
     bDragging = false;
     bDraggingChanged = false;
     
@@ -73,7 +70,6 @@ void ofxScrollView::reset() {
     zoomAnimatedTimeStart = 0;
     zoomAnimatedTimeTotal = 0;
     zoomAnimatedTarget = 0;
-    zoomID = -1;
     bZooming = false;
     bZoomingChanged = false;
     bZoomingAnimated = false;
@@ -242,7 +238,7 @@ void ofxScrollView::update() {
         bZoomingAnimatedStarted = false;
         
         dragCancel();
-        zoomDown(zoomAnimatedPos.x, zoomAnimatedPos.y, 0);
+        zoomDown(zoomAnimatedPos);
         
         bZoomingAnimated = true;
     }
@@ -437,13 +433,8 @@ void ofxScrollView::exit() {
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::dragDown(int x, int y, int id) {
-    if(dragID == id) {
-        return;
-    }
-    dragID = id;
-    
-    dragDownPos = dragMovePos = dragMovePosPrev = ofVec2f(x, y);
+void ofxScrollView::dragDown(const ofVec2f & vec) {
+    dragDownPos = dragMovePos = dragMovePosPrev = vec;
     dragVel.set(0);
     
     scrollPosDown = scrollPos;
@@ -452,22 +443,12 @@ void ofxScrollView::dragDown(int x, int y, int id) {
     bDraggingChanged = true;
 }
 
-void ofxScrollView::dragMoved(int x, int y, int id) {
-    if(dragID != id) {
-        return;
-    }
-    
-    dragMovePos.set(x, y);
+void ofxScrollView::dragMoved(const ofVec2f & vec) {
+    dragMovePos = vec;
 }
 
-void ofxScrollView::dragUp(int x, int y, int id) {
-    if(dragID != id) {
-        return;
-    }
-    
-    dragMovePos.set(x, y);
-    
-    dragID = -1;
+void ofxScrollView::dragUp(const ofVec2f & vec) {
+    dragMovePos = vec;
     
     bDragging = false;
     bDraggingChanged = true;
@@ -475,20 +456,14 @@ void ofxScrollView::dragUp(int x, int y, int id) {
 
 void ofxScrollView::dragCancel() {
     dragVel.set(0);
-    dragID = -1;
     
     bDragging = false;
     bDraggingChanged = true;
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::zoomDown(int x, int y, int id) {
-    if(zoomID == id) {
-        return;
-    }
-    zoomID = id;
-    
-    zoomDownScreenPos = zoomMoveScreenPos = ofVec2f(x, y);
+void ofxScrollView::zoomDown(const ofVec2f & vec) {
+    zoomDownScreenPos = zoomMoveScreenPos = vec;
     zoomDownContentPos.x = ofMap(zoomDownScreenPos.x, scrollRect.x, scrollRect.x + scrollRect.width, 0, contentRect.width, true);
     zoomDownContentPos.y = ofMap(zoomDownScreenPos.y, scrollRect.y, scrollRect.y + scrollRect.height, 0, contentRect.height, true);
     
@@ -499,30 +474,18 @@ void ofxScrollView::zoomDown(int x, int y, int id) {
     bZoomingAnimated = false;
 }
 
-void ofxScrollView::zoomMoved(int x, int y, int id) {
-    if(zoomID != id) {
-        return;
-    }
-    
-    zoomMoveScreenPos.set(x, y);
+void ofxScrollView::zoomMoved(const ofVec2f & vec) {
+    zoomMoveScreenPos = vec;
 }
 
-void ofxScrollView::zoomUp(int x, int y, int id) {
-    if(zoomID != id) {
-        return;
-    }
-    
-    zoomMoveScreenPos.set(x, y);
-    
-    zoomID = -1;
+void ofxScrollView::zoomUp(const ofVec2f & vec) {
+    zoomMoveScreenPos = vec;
     
     bZooming = false;
     bZoomingChanged = true;
 }
 
 void ofxScrollView::zoomCancel() {
-    zoomID = -1;
-    
     bZooming = false;
     bZoomingChanged = true;
     bZoomingAnimated = false;
@@ -534,34 +497,23 @@ void ofxScrollView::mouseMoved(int x, int y) {
 }
 
 void ofxScrollView::mousePressed(int x, int y, int button) {
-    bool bHit = windowRect.inside(x, y);
-    if(bHit == false) {
-        return;
-    }
-    
     if(button == 0) {
-        zoomCancel();
-        dragDown(x, y, button);
+        
+        touchDown(x, y, 0);
+        
     } else if(button == 2) {
-        dragCancel();
-        zoomDown(x, y, button);
+        
+        touchDown(x, y, 0);
+        touchDown(x, y, 2);
     }
 }
 
 void ofxScrollView::mouseDragged(int x, int y, int button) {
-    if(button == 0) {
-        dragMoved(x, y, button);
-    } else if(button == 2) {
-        zoomMoved(x, y, button);
-    }
+    touchMoved(x, y, button);
 }
 
 void ofxScrollView::mouseReleased(int x, int y, int button) {
-    if(button == 0) {
-        dragUp(x, y, button);
-    } else if(button == 2) {
-        zoomUp(x, y, button);
-    }
+    touchUp(x, y, button);
 }
 
 //--------------------------------------------------------------
@@ -571,21 +523,97 @@ void ofxScrollView::touchDown(int x, int y, int id) {
         return;
     }
     
-    if(id == 0) {
-        dragDown(x, y, id);
+    if(touchPoints.size() >= 2) {
+        // max 2 touches.
+        return;
+    }
+    
+    touchPoints.push_back(new ofxScrollViewTouchPoint(x, y, id));
+    
+    if(touchPoints.size() == 1) {
+        
+        zoomCancel();
+        dragDown(touchPoints[0]->touchPos);
+        
+    } else if(touchPoints.size() == 2) {
+        
+        ofVec2f tp0(touchPoints[0]->touchPos);
+        ofVec2f tp1(touchPoints[1]->touchPos);
+        ofVec2f tmp = (tp1 - tp0) * 0.5 + tp0;
+        
+        dragCancel();
+        zoomDown(tmp);
     }
 }
 
 void ofxScrollView::touchMoved(int x, int y, int id) {
-    if(id == 0) {
-        dragMoved(x, y, id);
+    int touchIndex = -1;
+    for(int i=0; i<touchPoints.size(); i++) {
+        ofxScrollViewTouchPoint & touchPoint = *touchPoints[i];
+        if(touchPoint.touchID == id) {
+            touchPoint.touchPos.x = x;
+            touchPoint.touchPos.y = y;
+            touchIndex = i;
+            break;
+        }
+    }
+    
+    if(touchIndex == -1) {
+        return;
+    }
+    
+    if(touchPoints.size() == 1) {
+        
+        dragMoved(touchPoints[0]->touchPos);
+        
+    } else if(touchPoints.size() == 2) {
+        
+        ofVec2f tp0(touchPoints[0]->touchPos);
+        ofVec2f tp1(touchPoints[1]->touchPos);
+        ofVec2f tmp = (tp1 - tp0) * 0.5 + tp0;
+        
+        zoomMoved(tmp);
     }
 }
 
 void ofxScrollView::touchUp(int x, int y, int id) {
-    if(id == 0) {
-        dragUp(x, y, id);
+    int touchIndex = -1;
+    for(int i=0; i<touchPoints.size(); i++) {
+        ofxScrollViewTouchPoint & touchPoint = *touchPoints[i];
+        if(touchPoint.touchID == id) {
+            touchPoint.touchPos.x = x;
+            touchPoint.touchPos.y = y;
+            touchIndex = i;
+            break;
+        }
     }
+    
+    if(touchIndex == -1) {
+        return;
+    }
+    
+    if(touchPoints.size() == 1) {
+        
+        dragUp(touchPoints[0]->touchPos);
+        
+    } else if(touchPoints.size() == 2) {
+     
+        ofVec2f tp0(touchPoints[0]->touchPos);
+        ofVec2f tp1(touchPoints[1]->touchPos);
+        ofVec2f tmp = (tp1 - tp0) * 0.5 + tp0;
+        
+        zoomUp(tmp);
+    }
+    
+    for(int i=0; i<touchPoints.size(); i++) {
+        delete touchPoints[i];
+        touchPoints[i] = NULL;
+    }
+    touchPoints.clear();
+    
+//    delete touchPoints[touchIndex];
+//    touchPoints[touchIndex] = NULL;
+//    touchPoints.erase(touchPoints.begin()+touchIndex);
 }
 
 void ofxScrollView::touchDoubleTap(int x, int y, int id) {

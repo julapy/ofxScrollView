@@ -9,6 +9,18 @@
 #include "ofMain.h"
 
 //--------------------------------------------------------------
+class ofxScrollViewTouchPoint {
+public:
+    ofxScrollViewTouchPoint(int x, int y, int id) {
+        touchID = id;
+        touchPos.x = x;
+        touchPos.y = y;
+    }
+    int touchID;
+    ofVec2f touchPos;
+};
+
+//--------------------------------------------------------------
 class ofxScrollView {
     
 public:
@@ -54,14 +66,14 @@ public:
     
     virtual void exit();
     
-    virtual void dragDown(int x, int y, int id);
-    virtual void dragMoved(int x, int y, int id);
-    virtual void dragUp(int x, int y, int id);
+    virtual void dragDown(const ofVec2f & vec);
+    virtual void dragMoved(const ofVec2f & vec);
+    virtual void dragUp(const ofVec2f & vec);
     virtual void dragCancel();
     
-    virtual void zoomDown(int x, int y, int id);
-    virtual void zoomMoved(int x, int y, int id);
-    virtual void zoomUp(int x, int y, int id);
+    virtual void zoomDown(const ofVec2f & vec);
+    virtual void zoomMoved(const ofVec2f & vec);
+    virtual void zoomUp(const ofVec2f & vec);
     virtual void zoomCancel();
     
     bool bUserInteractionEnabled;
@@ -80,7 +92,6 @@ public:
     ofVec2f dragMovePos;
     ofVec2f dragMovePosPrev;
     ofVec2f dragVel;
-    int dragID;
     bool bDragging;
     bool bDraggingChanged;
     
@@ -91,7 +102,6 @@ public:
     float zoomAnimatedTimeStart;
     float zoomAnimatedTimeTotal;
     float zoomAnimatedTarget;
-    int zoomID;
     bool bZooming;
     bool bZoomingChanged;
     bool bZoomingAnimated;
@@ -104,6 +114,8 @@ public:
     float scaleMax;
     float scaleMultiplier;
     ofMatrix4x4 mat;
+    
+    vector<ofxScrollViewTouchPoint *> touchPoints;
     
     //----------------------------------------------------------
     virtual void mouseMoved(ofMouseEventArgs & mouse){
