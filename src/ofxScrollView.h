@@ -66,17 +66,18 @@ public:
     
     virtual void exit();
     
-    virtual void dragDown(const ofVec2f & vec);
-    virtual void dragMoved(const ofVec2f & vec);
-    virtual void dragUp(const ofVec2f & vec);
+    virtual void dragDown(const ofVec2f & point);
+    virtual void dragMoved(const ofVec2f & point);
+    virtual void dragUp(const ofVec2f & point);
     virtual void dragCancel();
     
-    virtual void zoomDown(const ofVec2f & vec);
-    virtual void zoomMoved(const ofVec2f & vec);
-    virtual void zoomUp(const ofVec2f & vec);
+    virtual void zoomDown(const ofVec2f & point, float pointDist);
+    virtual void zoomMoved(const ofVec2f & point, float pointDist);
+    virtual void zoomUp(const ofVec2f & point, float pointDist);
     virtual void zoomCancel();
     
     bool bUserInteractionEnabled;
+    bool bPinchZoom;
     
     ofRectangle windowRect;
     ofRectangle contentRect;
@@ -98,12 +99,15 @@ public:
     ofVec2f zoomDownScreenPos;
     ofVec2f zoomMoveScreenPos;
     ofVec2f zoomDownContentPos;
+    float zoomDownPointDist;
+    float zoomMovePointDist;
+    bool bZooming;
+    bool bZoomingChanged;
+    
     ofVec2f zoomAnimatedPos;
     float zoomAnimatedTimeStart;
     float zoomAnimatedTimeTotal;
     float zoomAnimatedTarget;
-    bool bZooming;
-    bool bZoomingChanged;
     bool bZoomingAnimated;
     bool bZoomingAnimatedStarted;
     bool bZoomingAnimatedFinished;
@@ -131,9 +135,9 @@ public:
         mouseReleased(mouse.x,mouse.y,mouse.button);
     }
     
-    virtual void mouseMoved( int x, int y);
-    virtual void mouseDragged( int x, int y, int button);
-    virtual void mousePressed( int x, int y, int button);
+    virtual void mouseMoved(int x, int y);
+    virtual void mouseDragged(int x, int y, int button);
+    virtual void mousePressed(int x, int y, int button);
     virtual void mouseReleased(int x, int y, int button);
     
     //----------------------------------------------------------
