@@ -84,14 +84,24 @@ void ofApp::mousePressed(int x, int y, int button){
     
     if(bDoubleTap == true) {
         ofLog(OF_LOG_NOTICE, "double tap " + ofToString(ofGetFrameNum()));
-        
-        float zoomTimeSec = 5.0;
-        bool bZoomed = scrollView.isZoomed();
+
+        float zoomCurrent = scrollView.getZoom();
+        float zoomMax = scrollView.getZoomMax();
+        float zoomMin = scrollView.getZoomMin();
+        float zoomRange = zoomMax - zoomMin;
+
+        float zoomTarget = 1.0;
+        bool bZoomed = scrollView.isZoomedMax();
         if(bZoomed == true) {
-            scrollView.zoomToMin(touchPoint, zoomTimeSec);
+            zoomTarget = zoomMin;
         } else {
-            scrollView.zoomToMax(touchPoint, zoomTimeSec);
+            zoomTarget = zoomMax;
         }
+
+        float zoomTimeSec = ABS(zoomTarget - zoomCurrent) / zoomRange;
+        zoomTimeSec *= 0.2;
+        
+        scrollView.zoomTo(touchPoint, zoomTarget, zoomTimeSec);
     }
 }
 

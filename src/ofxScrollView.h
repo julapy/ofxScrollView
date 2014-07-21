@@ -30,6 +30,8 @@ public:
     float getZoomMin();
     float getZoomMax();
     bool isZoomed();
+    bool isZoomedMin();
+    bool isZoomedMax();
 
     void zoomTo(const ofVec2f & pos, float zoom, float timeSec=0.0);
     void zoomToMin(const ofVec2f & pos, float timeSec=0.0);
@@ -85,6 +87,7 @@ public:
     ofVec2f zoomDownScreenPos;
     ofVec2f zoomMoveScreenPos;
     ofVec2f zoomDownContentPos;
+    ofVec2f zoomAnimatedPos;
     float zoomAnimatedTimeStart;
     float zoomAnimatedTimeTotal;
     float zoomAnimatedTarget;
@@ -92,6 +95,7 @@ public:
     bool bZooming;
     bool bZoomingChanged;
     bool bZoomingAnimated;
+    bool bZoomingAnimatedStarted;
     bool bZoomingAnimatedFinished;
     
     float scale;
