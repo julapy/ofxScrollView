@@ -20,6 +20,7 @@ ofxScrollView::ofxScrollView() {
     scrollEasing = 0.5;
     bounceBack = 1.0;
     
+    dragVelDecay = 0.9;
     bDragging = false;
     bDraggingChanged = false;
     
@@ -221,6 +222,10 @@ void ofxScrollView::setBounceBack(float value) {
     bounceBack = value;
 }
 
+void ofxScrollView::setDragVelocityDecay(float value) {
+    dragVelDecay = value;
+}
+
 const ofRectangle & ofxScrollView::getWindowRect() {
     return windowRect;
 }
@@ -324,7 +329,7 @@ void ofxScrollView::update() {
             
         } else {
             
-            dragVel *= 0.9;
+            dragVel *= dragVelDecay;
             if(ABS(dragVel.x) < kEasingStop) {
                 dragVel.x = 0;
             }
@@ -332,8 +337,8 @@ void ofxScrollView::update() {
                 dragVel.y = 0;
             }
             bool bAddVel = true;
-            bAddVel = bAddVel && (dragVel.x > 0);
-            bAddVel = bAddVel && (dragVel.y > 0);
+            bAddVel = bAddVel && (ABS(dragVel.x) > 0);
+            bAddVel = bAddVel && (ABS(dragVel.y) > 0);
             if(bAddVel == true) {
                 scrollPos += dragVel;
             }

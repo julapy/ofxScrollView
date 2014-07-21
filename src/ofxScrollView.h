@@ -53,6 +53,7 @@ public:
     void setScrollPosition(float x=0, float y=0, bool bEase=true);
     void setUserInteraction(bool bEnable);
     void setBounceBack(float value);
+    void setDragVelocityDecay(float value);
     const ofRectangle & getWindowRect();
     const ofRectangle & getContentRect();
     const ofVec2f & getScrollPosition();
@@ -93,6 +94,7 @@ public:
     ofVec2f dragMovePos;
     ofVec2f dragMovePosPrev;
     ofVec2f dragVel;
+    float dragVelDecay;
     bool bDragging;
     bool bDraggingChanged;
     
