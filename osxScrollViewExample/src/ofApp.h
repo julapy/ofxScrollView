@@ -24,12 +24,10 @@ public:
     
     ofRectangle windowRect;
     ofRectangle contentRect;
-    
     ofxScrollView scrollView;
     
     Grid grid;
     
     ofVec2f touchPoint;
     float touchTime = 0.0;
-    
 };

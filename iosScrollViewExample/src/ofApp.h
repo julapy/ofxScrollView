@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxiOS.h"
 #include "ofxiOSExtras.h"
+#include "ofxScrollView.h"
+#include "Grid.h"
 
 class ofApp : public ofxiOSApp{
 	
@@ -23,6 +25,15 @@ public:
     void gotFocus();
     void gotMemoryWarning();
     void deviceOrientationChanged(int newOrientation);
+    
+    ofRectangle windowRect;
+    ofRectangle contentRect;
+    ofxScrollView scrollView;
+    
+    Grid grid;
+    
+    ofVec2f touchPoint;
+    float touchTime = 0.0;
 
 };
 

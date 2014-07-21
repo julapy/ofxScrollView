@@ -14,6 +14,7 @@
 		53F323EB10A20EDB00E0DAE4 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53F323EA10A20EDB00E0DAE4 /* OpenAL.framework */; };
 		67391FB41975174E0066BE65 /* ofxScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67391FB21975174E0066BE65 /* ofxScrollView.cpp */; };
 		677B312617D80941002E90B2 /* ofApp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 677B312517D80941002E90B2 /* ofApp.mm */; };
+		67EDDB29197CC8E800CFCD8B /* Grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67EDDB27197CC8E800CFCD8B /* Grid.cpp */; };
 		BB16EBD20F2B2A9500518274 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB16EBD10F2B2A9500518274 /* OpenGLES.framework */; };
 		BB16EBD90F2B2AB500518274 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB16EBD80F2B2AB500518274 /* QuartzCore.framework */; };
 		BBE5EAB80F49AD8400F28951 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBE5EAB70F49AD8400F28951 /* AudioToolbox.framework */; };
@@ -54,6 +55,8 @@
 		67391FB31975174E0066BE65 /* ofxScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxScrollView.h; sourceTree = "<group>"; };
 		677B312417D80941002E90B2 /* ofApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofApp.h; sourceTree = "<group>"; };
 		677B312517D80941002E90B2 /* ofApp.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofApp.mm; sourceTree = "<group>"; };
+		67EDDB27197CC8E800CFCD8B /* Grid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grid.cpp; sourceTree = "<group>"; };
+		67EDDB28197CC8E800CFCD8B /* Grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grid.h; sourceTree = "<group>"; };
 		BB16EBD10F2B2A9500518274 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BB16EBD80F2B2AB500518274 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		BB24DDC910DA781C00E9C588 /* ofxiOS-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ofxiOS-Info.plist"; sourceTree = "<group>"; };
@@ -145,8 +148,8 @@
 		67391FB11975174E0066BE65 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				67391FB21975174E0066BE65 /* ofxScrollView.cpp */,
 				67391FB31975174E0066BE65 /* ofxScrollView.h */,
+				67391FB21975174E0066BE65 /* ofxScrollView.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -201,6 +204,8 @@
 				E4D8936B11527B74007E1F53 /* main.mm */,
 				677B312417D80941002E90B2 /* ofApp.h */,
 				677B312517D80941002E90B2 /* ofApp.mm */,
+				67EDDB28197CC8E800CFCD8B /* Grid.h */,
+				67EDDB27197CC8E800CFCD8B /* Grid.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -304,6 +309,7 @@
 				E4D8936E11527B74007E1F53 /* main.mm in Sources */,
 				677B312617D80941002E90B2 /* ofApp.mm in Sources */,
 				67391FB41975174E0066BE65 /* ofxScrollView.cpp in Sources */,
+				67EDDB29197CC8E800CFCD8B /* Grid.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,8 +331,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ofxiOS_Prefix.pch;
 				INFOPLIST_FILE = "ofxiOS-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = iosScrollViewExample;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "armv6 armv7";
 			};
 			name = Debug;
@@ -337,7 +345,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ofxiOS_Prefix.pch;
 				INFOPLIST_FILE = "ofxiOS-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = iosScrollViewExample;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "armv6 armv7";
 			};
 			name = Release;
