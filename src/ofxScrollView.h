@@ -35,8 +35,7 @@ public:
     void setContentRect(const ofRectangle & rect);
     
     void setZoomMinMax(float min, float max);
-    void setZoomMultiplier(float value);
-    void setZoomContentToFitContentRect();
+    void setZoomToFitContent(ofAspectRatioMode aspectRatioMode);
     void setZoom(float value);
     float getZoom();
     float getZoomMin();
@@ -77,6 +76,7 @@ public:
     virtual void zoomUp(const ofVec2f & point, float pointDist);
     virtual void zoomCancel();
     
+    bool bFirstUpdate;
     bool bUserInteractionEnabled;
     bool bPinchZoom;
     
@@ -118,7 +118,6 @@ public:
     float scaleDown;
     float scaleMin;
     float scaleMax;
-    float scaleMultiplier;
     ofMatrix4x4 mat;
     
     vector<ofxScrollViewTouchPoint *> touchPoints;

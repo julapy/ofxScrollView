@@ -22,6 +22,7 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     
+    ofRectangle screenRect;
     ofRectangle windowRect;
     ofRectangle contentRect;
     ofxScrollView scrollView;

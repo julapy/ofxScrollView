@@ -7,16 +7,20 @@ void ofApp::setup(){
     ofSetLogLevel(OF_LOG_NOTICE);
 
     //----------------------------------------------------------
-    windowRect.width = ofGetWidth();
-    windowRect.height = ofGetHeight();
+    screenRect.width = ofGetWidth();
+    screenRect.height = ofGetHeight();
+    
+    windowRect.width = (int)(screenRect.width * 0.9);
+    windowRect.height = (int)(screenRect.height * 0.9);
+    windowRect.x = (int)((screenRect.width - windowRect.width) * 0.5);
+    windowRect.y = (int)((screenRect.height - windowRect.height) * 0.5);
     
     contentRect.width = grid.getWidth();
     contentRect.height = grid.getHeight();
     
     scrollView.setWindowRect(windowRect);
     scrollView.setContentRect(contentRect);
-    scrollView.setZoomMultiplier(3.0);
-    scrollView.setZoomContentToFitContentRect();
+    scrollView.setZoomToFitContent(OF_ASPECT_RATIO_KEEP_BY_EXPANDING);
     scrollView.setScrollEasing(0.3); // smoothness of scrolling, between 0 and 1.
     scrollView.setBounceBack(0.3); // the speed of bounce back, between 0 and 1.
     scrollView.setDragVelocityDecay(0.9); // the speed of decay of drag velocity after release, between 0 and 1.
@@ -44,6 +48,23 @@ void ofApp::draw(){
     grid.draw();
     
     scrollView.end();
+    
+    ofSetColor(0);
+    ofBeginShape();
+    ofVertex(screenRect.x, screenRect.y);
+    ofVertex(screenRect.x + screenRect.width, screenRect.y);
+    ofVertex(screenRect.x + screenRect.width, screenRect.y + screenRect.height);
+    ofVertex(screenRect.x, screenRect.y + screenRect.height);
+    ofNextContour();
+    ofVertex(windowRect.x, windowRect.y);
+    ofVertex(windowRect.x + windowRect.width, windowRect.y);
+    ofVertex(windowRect.x + windowRect.width, windowRect.y + windowRect.height);
+    ofVertex(windowRect.x, windowRect.y + windowRect.height);
+    ofEndShape(true);
+    ofSetColor(255);
+    ofNoFill();
+    ofRect(windowRect);
+    ofFill();
     
     scrollView.draw();
 }
@@ -84,8 +105,6 @@ void ofApp::mousePressed(int x, int y, int button){
     bDoubleTap = bDoubleTap && (touchPointDiff.length() < 10);
     
     if(bDoubleTap == true) {
-        ofLog(OF_LOG_NOTICE, "double tap " + ofToString(ofGetFrameNum()));
-
         float zoomCurrent = scrollView.getZoom();
         float zoomMax = scrollView.getZoomMax();
         float zoomMin = scrollView.getZoomMin();
@@ -100,7 +119,7 @@ void ofApp::mousePressed(int x, int y, int button){
         }
 
         float zoomTimeSec = ABS(zoomTarget - zoomCurrent) / zoomRange;
-        zoomTimeSec *= 0.2;
+        zoomTimeSec *= 0.4;
         
         scrollView.zoomTo(touchPoint, zoomTarget, zoomTimeSec);
     }

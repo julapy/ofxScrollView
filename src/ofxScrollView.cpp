@@ -40,7 +40,6 @@ ofxScrollView::ofxScrollView() {
     scaleDown = 1.0;
     scaleMin = 1.0;
     scaleMax = 1.0;
-    scaleMultiplier = 1.0;
     
     setUserInteraction(true);
 }
@@ -58,6 +57,10 @@ void ofxScrollView::setup() {
     if(contentRect.isEmpty() == true) {
         setContentRect(windowRect);
     }
+    
+    scrollPos = scrollPosEased = ofVec2f(windowRect.x, windowRect.y);
+    
+    bFirstUpdate = true;
 }
 
 void ofxScrollView::reset() {
@@ -87,6 +90,8 @@ void ofxScrollView::reset() {
     scale = scaleMin;
     scaleDown = scaleMin;
     mat.makeIdentityMatrix();
+    
+    bFirstUpdate = true;
 }
 
 //--------------------------------------------------------------
@@ -108,22 +113,26 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
 void ofxScrollView::setZoomMinMax(float min, float max) {
     scaleMin = min;
     scaleMax = min;
-    scaleMultiplier = scaleMax / scaleMin;
     scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
-void ofxScrollView::setZoomMultiplier(float value) {
-    scaleMultiplier = value;
-    scaleMax = scaleMin * scaleMultiplier;
-    scale = ofClamp(scale, scaleMin, scaleMax);
-}
-
-void ofxScrollView::setZoomContentToFitContentRect() {
+void ofxScrollView::setZoomToFitContent(ofAspectRatioMode aspectRatioMode) {
     float sx = windowRect.width / contentRect.width;
     float sy = windowRect.height / contentRect.height;
-    scaleMin = MAX(sx, sy);
-    scaleMax = scaleMin * scaleMultiplier;
-    scale = ofClamp(scale, scaleMin, scaleMax);
+    
+    if(aspectRatioMode != OF_ASPECT_RATIO_KEEP_BY_EXPANDING &&
+       aspectRatioMode != OF_ASPECT_RATIO_KEEP) {
+        aspectRatioMode = OF_ASPECT_RATIO_KEEP_BY_EXPANDING; // default.
+    }
+    
+    if(aspectRatioMode == OF_ASPECT_RATIO_KEEP) {
+        scaleMin = MIN(sx, sy);
+    } else if(aspectRatioMode == OF_ASPECT_RATIO_KEEP_BY_EXPANDING) {
+        scaleMin = MAX(sx, sy);
+    }
+    
+    scaleMax = 1.0;
+    scale = scaleMin;
 }
 
 void ofxScrollView::setZoom(float value) {
@@ -352,30 +361,49 @@ void ofxScrollView::update() {
     
     if(bContainPosition == true) {
         
-        float x0 = windowRect.x - MAX(scrollRect.width - windowRect.width, 0.0);
-        float x1 = windowRect.x;
-        float y0 = windowRect.y - MAX(scrollRect.height - windowRect.height, 0.0);
-        float y1 = windowRect.y;
+        ofRectangle boundingRect = windowRect;
+        ofRectangle contentRectMin = contentRect;
+        contentRectMin.width *= scaleMin;
+        contentRectMin.height *= scaleMin;
+        
+        if(scrollRect.width < windowRect.width) {
+            boundingRect.x = windowRect.x + (windowRect.width - contentRectMin.width) * 0.5;
+            boundingRect.width = contentRectMin.width;
+        }
+        if(scrollRect.height < windowRect.height) {
+            boundingRect.y = windowRect.y + (windowRect.height - contentRectMin.height) * 0.5;
+            boundingRect.height = contentRectMin.height;
+        }
+        
+        float x0 = boundingRect.x - MAX(scrollRect.width - boundingRect.width, 0.0);
+        float x1 = boundingRect.x;
+        float y0 = boundingRect.y - MAX(scrollRect.height - boundingRect.height, 0.0);
+        float y1 = boundingRect.y;
+        
+        float scrollPosEasing = bounceBack;
+        if(bFirstUpdate == true) {
+            scrollPosEasing = 1.0;
+        }
         
         if(scrollPos.x < x0) {
-            scrollPos.x += (x0 - scrollPos.x) * bounceBack;
+            scrollPos.x += (x0 - scrollPos.x) * scrollPosEasing;
             if(ABS(x0 - scrollPos.x) < kEasingStop) {
                 scrollPos.x = x0;
             }
         } else if(scrollPos.x > x1) {
-            scrollPos.x += (x1 - scrollPos.x) * bounceBack;
+            scrollPos.x += (x1 - scrollPos.x) * scrollPosEasing;
             if(ABS(x1 - scrollPos.x) < kEasingStop) {
                 scrollPos.x = x1;
             }
         }
         
         if(scrollPos.y < y0) {
-            scrollPos.y += (y0 - scrollPos.y) * bounceBack;
+            scrollPos.y += (y0 - scrollPos.y) * scrollPosEasing;
             if(ABS(y0 - scrollPos.y) < kEasingStop) {
                 scrollPos.y = y0;
             }
         } else if(scrollPos.y > y1) {
-            scrollPos.y += (y1 - scrollPos.y) * bounceBack;
+            scrollPos.y += (y1 - scrollPos.y) * scrollPosEasing;
             if(ABS(y1 - scrollPos.y) < kEasingStop) {
                 scrollPos.y = y1;
             }
@@ -383,6 +411,9 @@ void ofxScrollView::update() {
     }
     
     //----------------------------------------------------------
+    if(bFirstUpdate == true) {
+        scrollPosEased = scrollPos;
+    }
     scrollPosEased += (scrollPos - scrollPosEased) * scrollEasing;
 
     if(ABS(scrollPos.x - scrollPosEased.x) < kEasingStop) {
@@ -422,6 +453,8 @@ void ofxScrollView::update() {
         bZoomingAnimatedFinished = false;
         zoomCancel();
     }
+    
+    bFirstUpdate = false;
 }
 
 //--------------------------------------------------------------
