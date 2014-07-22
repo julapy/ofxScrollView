@@ -33,9 +33,8 @@ public:
     
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
+    void fitContentToWindow(ofAspectRatioMode aspectRatioMode, float zoomMultiplier = 2.0);
     
-    void setZoomMinMax(float min, float max);
-    void setZoomToFitContent(ofAspectRatioMode aspectRatioMode);
     void setZoom(float value);
     float getZoom();
     float getZoomMin();
@@ -48,8 +47,10 @@ public:
     void zoomToMin(const ofVec2f & pos, float timeSec=0.0);
     void zoomToMax(const ofVec2f & pos, float timeSec=0.0);
     
+    void setScrollPositionX(float x, bool bEase=true);
+    void setScrollPositionY(float y, bool bEase=true);
+    void setScrollPosition(float x, float y, bool bEase=true);
     void setScrollEasing(float value);
-    void setScrollPosition(float x=0, float y=0, bool bEase=true);
     void setUserInteraction(bool bEnable);
     void setBounceBack(float value);
     void setDragVelocityDecay(float value);

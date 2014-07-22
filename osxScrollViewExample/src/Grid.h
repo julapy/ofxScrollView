@@ -15,10 +15,10 @@ public:
     Grid();
     ~Grid();
 
+    void setup(float width, float height);
     float getWidth();
     float getHeight();
     void draw();
     
-    float width;
-    float height;
+    ofVec2f size;
 };

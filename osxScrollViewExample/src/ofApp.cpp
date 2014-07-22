@@ -5,8 +5,10 @@ void ofApp::setup(){
     
     ofSetFrameRate(60);
     ofSetLogLevel(OF_LOG_NOTICE);
-
+    
     //----------------------------------------------------------
+    grid.setup(2048, 2048);
+
     screenRect.width = ofGetWidth();
     screenRect.height = ofGetHeight();
     
@@ -20,7 +22,7 @@ void ofApp::setup(){
     
     scrollView.setWindowRect(windowRect);
     scrollView.setContentRect(contentRect);
-    scrollView.setZoomToFitContent(OF_ASPECT_RATIO_KEEP_BY_EXPANDING);
+    scrollView.fitContentToWindow(OF_ASPECT_RATIO_KEEP, 2.0);
     scrollView.setScrollEasing(0.3); // smoothness of scrolling, between 0 and 1.
     scrollView.setBounceBack(0.3); // the speed of bounce back, between 0 and 1.
     scrollView.setDragVelocityDecay(0.9); // the speed of decay of drag velocity after release, between 0 and 1.

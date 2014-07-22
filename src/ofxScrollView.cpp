@@ -109,29 +109,19 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
     contentRect = rect;
 }
 
-//--------------------------------------------------------------
-void ofxScrollView::setZoomMinMax(float min, float max) {
-    scaleMin = min;
-    scaleMax = min;
-    scale = ofClamp(scale, scaleMin, scaleMax);
-}
-
-void ofxScrollView::setZoomToFitContent(ofAspectRatioMode aspectRatioMode) {
+void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode, float zoomMultiplier) {
     float sx = windowRect.width / contentRect.width;
     float sy = windowRect.height / contentRect.height;
-    
-    if(aspectRatioMode != OF_ASPECT_RATIO_KEEP_BY_EXPANDING &&
-       aspectRatioMode != OF_ASPECT_RATIO_KEEP) {
-        aspectRatioMode = OF_ASPECT_RATIO_KEEP_BY_EXPANDING; // default.
-    }
     
     if(aspectRatioMode == OF_ASPECT_RATIO_KEEP) {
         scaleMin = MIN(sx, sy);
     } else if(aspectRatioMode == OF_ASPECT_RATIO_KEEP_BY_EXPANDING) {
         scaleMin = MAX(sx, sy);
+    } else {
+        scaleMin = 1.0;
     }
     
-    scaleMax = 1.0;
+    scaleMax = scaleMin * zoomMultiplier;
     scale = scaleMin;
 }
 
@@ -181,18 +171,35 @@ void ofxScrollView::zoomToMax(const ofVec2f & pos, float timeSec) {
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::setScrollEasing(float value) {
-    scrollEasing = value;
+void ofxScrollView::setScrollPositionX(float x, bool bEase) {
+    dragCancel();
+    zoomCancel();
+    
+    float px = ofClamp(x, 0.0, 1.0);
+    scrollPos.x = windowRect.x - (contentRect.width - windowRect.width) * px;
+    if(bEase == false) {
+        scrollPosEased.x = scrollPos.x;
+    }
+}
+
+void ofxScrollView::setScrollPositionY(float y, bool bEase) {
+    dragCancel();
+    zoomCancel();
+    
+    float py = ofClamp(y, 0.0, 1.0);
+    scrollPos.y = windowRect.y - (contentRect.height - windowRect.height) * py;
+    if(bEase == false) {
+        scrollPosEased.y = scrollPos.y;
+    }
 }
 
 void ofxScrollView::setScrollPosition(float x, float y, bool bEase) {
-    dragCancel();
-    zoomCancel();
+    setScrollPositionX(x, bEase);
+    setScrollPositionY(y, bEase);
+}
 
-    scrollPos = ofVec2f(x, y);
-    if(bEase == false) {
-        scrollPosEased = scrollPos;
-    }
+void ofxScrollView::setScrollEasing(float value) {
+    scrollEasing = value;
 }
 
 void ofxScrollView::setUserInteraction(bool bEnable) {
