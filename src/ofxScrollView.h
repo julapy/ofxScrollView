@@ -56,6 +56,7 @@ public:
     void setDragVelocityDecay(float value);
     const ofRectangle & getWindowRect();
     const ofRectangle & getContentRect();
+    const ofRectangle & getScrollRect();
     const ofVec2f & getScrollPosition();
     const ofMatrix4x4 & getMatrix();
     

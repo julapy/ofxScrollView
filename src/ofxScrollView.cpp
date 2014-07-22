@@ -58,15 +58,13 @@ void ofxScrollView::setup() {
         setContentRect(windowRect);
     }
     
-    scrollPos = scrollPosEased = ofVec2f(windowRect.x, windowRect.y);
-    
-    bFirstUpdate = true;
+    reset();
 }
 
 void ofxScrollView::reset() {
-    scrollPos.set(0);
-    scrollPosEased.set(0);
-    scrollPosDown.set(0);
+    scrollPos = ofVec2f(windowRect.x, windowRect.y);
+    scrollPosEased = scrollPos;
+    scrollPosDown = scrollPos;
     
     dragDownPos.set(0);
     dragMovePos.set(0);
@@ -248,6 +246,10 @@ const ofRectangle & ofxScrollView::getWindowRect() {
 
 const ofRectangle & ofxScrollView::getContentRect() {
     return contentRect;
+}
+
+const ofRectangle & ofxScrollView::getScrollRect() {
+    return scrollRect;
 }
 
 const ofVec2f & ofxScrollView::getScrollPosition() {
