@@ -174,7 +174,7 @@ void ofxScrollView::setScrollPositionX(float x, bool bEase) {
     zoomCancel();
     
     float px = ofClamp(x, 0.0, 1.0);
-    scrollPos.x = windowRect.x - (contentRect.width - windowRect.width) * px;
+    scrollPos.x = windowRect.x - (scrollRect.width - windowRect.width) * px;
     if(bEase == false) {
         scrollPosEased.x = scrollPos.x;
     }
@@ -185,7 +185,7 @@ void ofxScrollView::setScrollPositionY(float y, bool bEase) {
     zoomCancel();
     
     float py = ofClamp(y, 0.0, 1.0);
-    scrollPos.y = windowRect.y - (contentRect.height - windowRect.height) * py;
+    scrollPos.y = windowRect.y - (scrollRect.height - windowRect.height) * py;
     if(bEase == false) {
         scrollPosEased.y = scrollPos.y;
     }
