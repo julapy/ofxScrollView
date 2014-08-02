@@ -256,6 +256,10 @@ const ofVec2f & ofxScrollView::getScrollPosition() {
     return scrollPosEased;
 }
 
+const ofVec2f & ofxScrollView::getScrollPositionNorm() {
+    return scrollPosEasedNorm;
+}
+
 const ofMatrix4x4 & ofxScrollView::getMatrix() {
     return mat;
 }
@@ -432,9 +436,6 @@ void ofxScrollView::update() {
         scrollPosEased.y = scrollPos.y;
     }
     
-    scrollRect.x = scrollPosEased.x;
-    scrollRect.y = scrollPosEased.y;
-    
     //----------------------------------------------------------
     
     mat.makeIdentityMatrix();
@@ -452,6 +453,23 @@ void ofxScrollView::update() {
     } else {
         
         //
+    }
+    
+    //----------------------------------------------------------
+    scrollRect.x = scrollPosEased.x;
+    scrollRect.y = scrollPosEased.y;
+    
+    float dx = windowRect.width - scrollRect.width;
+    float dy = windowRect.height - scrollRect.height;
+    if(dx >= 0) {
+        scrollPosEasedNorm.x = 0;
+    } else {
+        scrollPosEasedNorm.x = ofMap(scrollPosEased.x, dx, 0.0, 1.0, 0.0, true);
+    }
+    if(dy >= 0) {
+        scrollPosEasedNorm.y = 0;
+    } else {
+        scrollPosEasedNorm.y = ofMap(scrollPosEased.y, dy, 0.0, 1.0, 0.0, true);
     }
     
     //----------------------------------------------------------
