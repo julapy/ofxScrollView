@@ -22,7 +22,7 @@ void ofApp::setup(){
     
     scrollView.setWindowRect(windowRect);
     scrollView.setContentRect(contentRect);
-    scrollView.fitContentToWindow(OF_ASPECT_RATIO_KEEP, 2.0);
+    scrollView.fitContentToWindow(OF_ASPECT_RATIO_KEEP, 2.0); // works with ofAspectRatioMode values.
     scrollView.setScrollEasing(0.3); // smoothness of scrolling, between 0 and 1.
     scrollView.setBounceBack(0.3); // the speed of bounce back, between 0 and 1.
     scrollView.setDragVelocityDecay(0.9); // the speed of decay of drag velocity after release, between 0 and 1.

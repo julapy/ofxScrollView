@@ -110,13 +110,13 @@ public:
     bool bZooming;
     bool bZoomingChanged;
     
-    ofVec2f zoomAnimatedPos;
-    float zoomAnimatedTimeStart;
-    float zoomAnimatedTimeTotal;
-    float zoomAnimatedTarget;
-    bool bZoomingAnimated;
-    bool bZoomingAnimatedStarted;
-    bool bZoomingAnimatedFinished;
+    ofVec2f animPos;
+    float animTimeStart;
+    float animTimeTotal;
+    float animZoomTarget;
+    bool bAnimating;
+    bool bAnimationJustStarted;
+    bool bAnimationJustFinished;
     
     float scale;
     float scaleDown;

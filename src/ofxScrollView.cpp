@@ -29,12 +29,12 @@ ofxScrollView::ofxScrollView() {
     bZooming = false;
     bZoomingChanged = false;
     
-    zoomAnimatedTimeStart = 0;
-    zoomAnimatedTimeTotal = 0;
-    zoomAnimatedTarget = 0;
-    bZoomingAnimated = false;
-    bZoomingAnimatedStarted = false;
-    bZoomingAnimatedFinished = false;
+    animTimeStart = 0;
+    animTimeTotal = 0;
+    animZoomTarget = 0;
+    bAnimating = false;
+    bAnimationJustStarted = false;
+    bAnimationJustFinished = false;
     
     scale = 1.0;
     scaleDown = 1.0;
@@ -76,14 +76,14 @@ void ofxScrollView::reset() {
     zoomDownScreenPos.set(0);
     zoomMoveScreenPos.set(0);
     zoomDownContentPos.set(0);
-    zoomAnimatedTimeStart = 0;
-    zoomAnimatedTimeTotal = 0;
-    zoomAnimatedTarget = 0;
+    animTimeStart = 0;
+    animTimeTotal = 0;
+    animZoomTarget = 0;
     bZooming = false;
     bZoomingChanged = false;
-    bZoomingAnimated = false;
-    bZoomingAnimatedStarted = false;
-    bZoomingAnimatedFinished = false;
+    bAnimating = false;
+    bAnimationJustStarted = false;
+    bAnimationJustFinished = false;
     
     scale = scaleMin;
     scaleDown = scaleMin;
@@ -153,11 +153,11 @@ bool ofxScrollView::isZoomedMax() {
 
 //--------------------------------------------------------------
 void ofxScrollView::zoomTo(const ofVec2f & pos, float zoom, float timeSec) {
-    zoomAnimatedPos = pos;
-    zoomAnimatedTarget = ofClamp(zoom, scaleMin, scaleMax);
-    zoomAnimatedTimeStart = ofGetElapsedTimef();
-    zoomAnimatedTimeTotal = MAX(timeSec, 0.0);
-    bZoomingAnimatedStarted = true;
+    animPos = pos;
+    animZoomTarget = ofClamp(zoom, scaleMin, scaleMax);
+    animTimeStart = ofGetElapsedTimef();
+    animTimeTotal = MAX(timeSec, 0.0);
+    bAnimationJustStarted = true;
 }
 
 void ofxScrollView::zoomToMin(const ofVec2f & pos, float timeSec) {
@@ -268,13 +268,13 @@ const ofMatrix4x4 & ofxScrollView::getMatrix() {
 void ofxScrollView::update() {
 
     //----------------------------------------------------------
-    if(bZoomingAnimatedStarted == true) {
-        bZoomingAnimatedStarted = false;
+    if(bAnimationJustStarted == true) {
+        bAnimationJustStarted = false;
         
         dragCancel();
-        zoomDown(zoomAnimatedPos, 0);
+        zoomDown(animPos, 0);
         
-        bZoomingAnimated = true;
+        bAnimating = true;
     }
     
     //----------------------------------------------------------
@@ -282,25 +282,25 @@ void ofxScrollView::update() {
         
         float zoom = 0.0;
         
-        if(bZoomingAnimated == true) {
+        if(bAnimating == true) {
             
-            float zoomDiff = zoomAnimatedTarget - scaleDown;
+            float zoomDiff = animZoomTarget - scaleDown;
             
-            if(zoomAnimatedTimeTotal == 0) {
-                zoom = zoomAnimatedTarget;
+            if(animTimeTotal == 0) {
+                zoom = animZoomTarget;
             } else {
                 float timeNow = ofGetElapsedTimef();
                 zoom = ofMap(timeNow,
-                             zoomAnimatedTimeStart,
-                             zoomAnimatedTimeStart + zoomAnimatedTimeTotal,
+                             animTimeStart,
+                             animTimeStart + animTimeTotal,
                              0,
                              zoomDiff,
                              true);
             }
             
-            bZoomingAnimated = (zoom != zoomDiff);
-            if(bZoomingAnimated == false) {
-                bZoomingAnimatedFinished = true;
+            bAnimating = (zoom != zoomDiff);
+            if(bAnimating == false) {
+                bAnimationJustFinished = true;
             }
             
         } else {
@@ -476,8 +476,8 @@ void ofxScrollView::update() {
     bDraggingChanged = false;
     bZoomingChanged = false;
     
-    if(bZoomingAnimatedFinished == true) {
-        bZoomingAnimatedFinished = false;
+    if(bAnimationJustFinished == true) {
+        bAnimationJustFinished = false;
         zoomCancel();
     }
     
@@ -556,7 +556,7 @@ void ofxScrollView::zoomDown(const ofVec2f & point, float pointDist) {
     
     bZooming = true;
     bZoomingChanged = true;
-    bZoomingAnimated = false;
+    bAnimating = false;
 }
 
 void ofxScrollView::zoomMoved(const ofVec2f & point, float pointDist) {
@@ -575,7 +575,7 @@ void ofxScrollView::zoomUp(const ofVec2f & point, float pointDist) {
 void ofxScrollView::zoomCancel() {
     bZooming = false;
     bZoomingChanged = true;
-    bZoomingAnimated = false;
+    bAnimating = false;
 }
 
 //--------------------------------------------------------------
