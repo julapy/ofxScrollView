@@ -62,9 +62,10 @@ void ofxScrollView::setup() {
 }
 
 void ofxScrollView::reset() {
-    scrollPos = ofVec2f(windowRect.x, windowRect.y);
-    scrollPosEased = scrollPos;
-    scrollPosDown = scrollPos;
+    scrollRect.x = windowRect.x;
+    scrollRect.y = windowRect.y;
+    scrollPosEased.set(scrollRect.x, scrollRect.y);
+    scrollPosDown.set(scrollRect.x, scrollRect.y);
     
     dragDownPos.set(0);
     dragMovePos.set(0);
@@ -174,9 +175,9 @@ void ofxScrollView::setScrollPositionX(float x, bool bEase) {
     zoomCancel();
     
     float px = ofClamp(x, 0.0, 1.0);
-    scrollPos.x = windowRect.x - (scrollRect.width - windowRect.width) * px;
+    scrollRect.x = windowRect.x - (scrollRect.width - windowRect.width) * px;
     if(bEase == false) {
-        scrollPosEased.x = scrollPos.x;
+        scrollPosEased.x = scrollRect.x;
     }
 }
 
@@ -185,9 +186,9 @@ void ofxScrollView::setScrollPositionY(float y, bool bEase) {
     zoomCancel();
     
     float py = ofClamp(y, 0.0, 1.0);
-    scrollPos.y = windowRect.y - (scrollRect.height - windowRect.height) * py;
+    scrollRect.y = windowRect.y - (scrollRect.height - windowRect.height) * py;
     if(bEase == false) {
-        scrollPosEased.y = scrollPos.y;
+        scrollPosEased.y = scrollRect.y;
     }
 }
 
@@ -347,7 +348,8 @@ void ofxScrollView::update() {
             
             dragVel = dragMovePos - dragMovePosPrev;
             dragMovePosPrev = dragMovePos;
-            scrollPos += dragVel;
+            scrollRect.x += dragVel.x;
+            scrollRect.y += dragVel.y;
             
         } else {
             
@@ -362,7 +364,8 @@ void ofxScrollView::update() {
             bAddVel = bAddVel && (ABS(dragVel.x) > 0);
             bAddVel = bAddVel && (ABS(dragVel.y) > 0);
             if(bAddVel == true) {
-                scrollPos += dragVel;
+                scrollRect.x += dragVel.x;
+                scrollRect.y += dragVel.y;
             }
         }
     }
@@ -398,42 +401,44 @@ void ofxScrollView::update() {
             scrollPosEasing = 1.0;
         }
         
-        if(scrollPos.x < x0) {
-            scrollPos.x += (x0 - scrollPos.x) * scrollPosEasing;
-            if(ABS(x0 - scrollPos.x) < kEasingStop) {
-                scrollPos.x = x0;
+        if(scrollRect.x < x0) {
+            scrollRect.x += (x0 - scrollRect.x) * scrollPosEasing;
+            if(ABS(x0 - scrollRect.x) < kEasingStop) {
+                scrollRect.x = x0;
             }
-        } else if(scrollPos.x > x1) {
-            scrollPos.x += (x1 - scrollPos.x) * scrollPosEasing;
-            if(ABS(x1 - scrollPos.x) < kEasingStop) {
-                scrollPos.x = x1;
+        } else if(scrollRect.x > x1) {
+            scrollRect.x += (x1 - scrollRect.x) * scrollPosEasing;
+            if(ABS(x1 - scrollRect.x) < kEasingStop) {
+                scrollRect.x = x1;
             }
         }
         
-        if(scrollPos.y < y0) {
-            scrollPos.y += (y0 - scrollPos.y) * scrollPosEasing;
-            if(ABS(y0 - scrollPos.y) < kEasingStop) {
-                scrollPos.y = y0;
+        if(scrollRect.y < y0) {
+            scrollRect.y += (y0 - scrollRect.y) * scrollPosEasing;
+            if(ABS(y0 - scrollRect.y) < kEasingStop) {
+                scrollRect.y = y0;
             }
-        } else if(scrollPos.y > y1) {
-            scrollPos.y += (y1 - scrollPos.y) * scrollPosEasing;
-            if(ABS(y1 - scrollPos.y) < kEasingStop) {
-                scrollPos.y = y1;
+        } else if(scrollRect.y > y1) {
+            scrollRect.y += (y1 - scrollRect.y) * scrollPosEasing;
+            if(ABS(y1 - scrollRect.y) < kEasingStop) {
+                scrollRect.y = y1;
             }
         }
     }
     
     //----------------------------------------------------------
     if(bFirstUpdate == true) {
-        scrollPosEased = scrollPos;
+        scrollPosEased.x = scrollRect.x;
+        scrollPosEased.y = scrollRect.y;
     }
-    scrollPosEased += (scrollPos - scrollPosEased) * scrollEasing;
+    scrollPosEased.x += (scrollRect.x - scrollPosEased.x) * scrollEasing;
+    scrollPosEased.y += (scrollRect.y - scrollPosEased.y) * scrollEasing;
 
-    if(ABS(scrollPos.x - scrollPosEased.x) < kEasingStop) {
-        scrollPosEased.x = scrollPos.x;
+    if(ABS(scrollRect.x - scrollPosEased.x) < kEasingStop) {
+        scrollPosEased.x = scrollRect.x;
     }
-    if(ABS(scrollPos.y - scrollPosEased.y) < kEasingStop) {
-        scrollPosEased.y = scrollPos.y;
+    if(ABS(scrollRect.y - scrollPosEased.y) < kEasingStop) {
+        scrollPosEased.y = scrollRect.y;
     }
     
     //----------------------------------------------------------
@@ -448,7 +453,9 @@ void ofxScrollView::update() {
         ofVec3f p2 = p0 - p1;
         
         mat.postMultTranslate(p2);
-        scrollPos = scrollPosEased = mat.getTranslation();
+        scrollPosEased = mat.getTranslation();
+        scrollRect.x = scrollPosEased.x;
+        scrollRect.y = scrollPosEased.y;
         
     } else {
         
@@ -520,7 +527,8 @@ void ofxScrollView::dragDown(const ofVec2f & point) {
     dragDownPos = dragMovePos = dragMovePosPrev = point;
     dragVel.set(0);
     
-    scrollPosDown = scrollPos;
+    scrollPosDown.x = scrollRect.x;
+    scrollPosDown.y = scrollRect.y;
     
     bDragging = true;
     bDraggingChanged = true;

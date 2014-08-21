@@ -87,7 +87,6 @@ public:
     ofRectangle contentRect;
 
     ofRectangle scrollRect;
-    ofVec2f scrollPos;
     ofVec2f scrollPosEased;
     ofVec2f scrollPosEasedNorm;
     ofVec2f scrollPosDown;
