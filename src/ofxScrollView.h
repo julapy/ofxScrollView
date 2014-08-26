@@ -33,7 +33,8 @@ public:
     
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
-    void fitContentToWindow(ofAspectRatioMode aspectRatioMode, float zoomMultiplier = 2.0);
+    void fitContentToWindow(ofAspectRatioMode aspectRatioMode);
+    void fitContentToWindow(ofAspectRatioMode aspectRatioMode, float zoomMultiplier);
     
     void setZoom(float value);
     float getZoom();
