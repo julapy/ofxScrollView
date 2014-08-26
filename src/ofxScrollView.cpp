@@ -126,7 +126,18 @@ void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
 }
 
 void ofxScrollView::setZoom(float value) {
-    scale = ofClamp(value, scaleMin, scaleMax);
+    scale = value;
+    scale = ofClamp(scale, scaleMin, scaleMax);
+}
+
+void ofxScrollView::setZoomMin(float value) {
+    scaleMin = value;
+    scale = ofClamp(scale, scaleMin, scaleMax);
+}
+
+void ofxScrollView::setZoomMax(float value) {
+    scaleMax = value;
+    scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
 float ofxScrollView::getZoom() {

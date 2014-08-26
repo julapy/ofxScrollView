@@ -36,6 +36,8 @@ public:
     void fitContentToWindow(ofAspectRatioMode aspectRatioMode);
     
     void setZoom(float value);
+    void setZoomMin(float value);
+    void setZoomMax(float value);
     float getZoom();
     float getZoomMin();
     float getZoomMax();
