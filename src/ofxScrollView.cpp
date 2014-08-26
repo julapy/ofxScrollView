@@ -109,14 +109,6 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
 }
 
 void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
-    fitContentToWindow(aspectRatioMode, 1.0);
-
-    // make the max scale 1.0
-    // this is so the image can not be zoomed further then its original size.
-    scaleMax = 1.0;
-}
-
-void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode, float zoomMultiplier) {
     float sx = windowRect.width / contentRect.width;
     float sy = windowRect.height / contentRect.height;
     
@@ -128,7 +120,8 @@ void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode, float 
         scaleMin = 1.0;
     }
     
-    scaleMax = scaleMin * zoomMultiplier;
+    scaleMin = MIN(scaleMin, 1.0);
+    scaleMax = 1.0;
     scale = scaleMin;
 }
 
