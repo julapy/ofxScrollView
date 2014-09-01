@@ -570,7 +570,7 @@ void ofxScrollView::zoomDown(const ofVec2f & point, float pointDist) {
     zoomDownContentPos.x = ofMap(zoomDownScreenPos.x, scrollRect.x, scrollRect.x + scrollRect.width, 0, contentRect.width, true);
     zoomDownContentPos.y = ofMap(zoomDownScreenPos.y, scrollRect.y, scrollRect.y + scrollRect.height, 0, contentRect.height, true);
     
-    zoomDownPointDist = pointDist;
+    zoomDownPointDist = zoomMovePointDist = pointDist;
     
     scaleDown = scale;
     
