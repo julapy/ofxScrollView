@@ -24,9 +24,6 @@ float Grid::getHeight() {
 }
 
 void Grid::draw() {
-    ofSetColor(255);
-    ofRect(0, 0, width, height);
-
     int numOfRows = 20;
     int numOfCols = 20;
     float rowSize = height / numOfRows;
@@ -34,18 +31,9 @@ void Grid::draw() {
     
     ofSetColor(0);
     
-//    for(int yi=0; yi<numOfRows; yi++) {
-//        for(int xi=0; xi<numOfCols; xi++) {
-//            int i = (yi * numOfCols) + xi;
-//            int x = xi * colSize;
-//            int y = yi * rowSize;
-//            
-//            ofDrawBitmapString(ofToString(i), x + 60, y + 60);
-//        }
-//    }
-    
     ofNoFill();
     ofSetColor(ofColor::red);
+    ofSetLineWidth(2.0);
     ofRect(0, 0, width, height);
     
     for(int yi=1; yi<numOfRows; yi++) {
@@ -66,4 +54,5 @@ void Grid::draw() {
     
     ofFill();
     ofSetColor(255);
+    ofSetLineWidth(1.0);
 }

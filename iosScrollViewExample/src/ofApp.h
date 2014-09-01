@@ -31,6 +31,7 @@ public:
     ofxScrollView scrollView;
     
     Grid grid;
+    ofTexture image;
     
     ofVec2f touchPoint;
     float touchTime = 0.0;
