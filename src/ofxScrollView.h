@@ -49,6 +49,9 @@ public:
     void zoomToMin(const ofVec2f & pos, float timeSec=0.0);
     void zoomToMax(const ofVec2f & pos, float timeSec=0.0);
     
+    void positionContentPointAtWindowPoint(const ofVec2f & contentPoint,
+                                           const ofVec2f & windowPoint);
+    
     void setScrollPositionX(float x, bool bEase=true);
     void setScrollPositionY(float y, bool bEase=true);
     void setScrollPosition(float x, float y, bool bEase=true);

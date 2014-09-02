@@ -182,6 +182,34 @@ void ofxScrollView::zoomToMax(const ofVec2f & pos, float timeSec) {
 }
 
 //--------------------------------------------------------------
+void ofxScrollView::positionContentPointAtWindowPoint(const ofVec2f & contentPoint,
+                                                      const ofVec2f & windowPoint) {
+    ofVec2f contentPointNorm = contentPoint;
+    contentPointNorm.x /= contentRect.width;
+    contentPointNorm.y /= contentRect.height;
+    
+    ofVec2f contentPointInScrollRect = contentPointNorm;
+    contentPointInScrollRect.x *= scrollRect.width;
+    contentPointInScrollRect.y *= scrollRect.height;
+    contentPointInScrollRect.x += scrollRect.x;
+    contentPointInScrollRect.y += scrollRect.y;
+    
+    ofVec2f screenPoint = windowPoint;
+    screenPoint.x += windowRect.x;
+    screenPoint.y += windowRect.y;
+    
+    ofVec2f contentPointToScreenPointDifference = screenPoint - contentPointInScrollRect;
+    
+    ofVec2f scrollPositionNorm = contentPointToScreenPointDifference;
+    scrollPositionNorm.x += scrollRect.x;
+    scrollPositionNorm.y += scrollRect.y;
+    scrollPositionNorm.x /= scrollRect.width;
+    scrollPositionNorm.y /= scrollRect.height;
+    
+    setScrollPosition(scrollPositionNorm.x, scrollPositionNorm.y);
+}
+
+//--------------------------------------------------------------
 void ofxScrollView::setScrollPositionX(float x, bool bEase) {
     dragCancel();
     zoomCancel();
