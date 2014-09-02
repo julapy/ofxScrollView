@@ -107,6 +107,7 @@ void ofxScrollView::setContentRect(const ofRectangle & rect) {
     contentRect = rect;
 }
 
+//--------------------------------------------------------------
 void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
     float sx = windowRect.width / contentRect.width;
     float sy = windowRect.height / contentRect.height;
@@ -124,6 +125,7 @@ void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
     scale = scaleMin;
 }
 
+//--------------------------------------------------------------
 void ofxScrollView::setZoom(float value) {
     scale = value;
     scale = ofClamp(scale, scaleMin, scaleMax);
@@ -139,6 +141,7 @@ void ofxScrollView::setZoomMax(float value) {
     scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
+//--------------------------------------------------------------
 float ofxScrollView::getZoom() {
     return scale;
 }
@@ -151,6 +154,7 @@ float ofxScrollView::getZoomMax() {
     return scaleMax;
 }
 
+//--------------------------------------------------------------
 bool ofxScrollView::isZoomed() {
     return (scale > scaleMin);
 }
@@ -231,62 +235,6 @@ void ofxScrollView::setScrollPosition(float x, float y, bool bEase) {
     setScrollPositionY(y, bEase);
 }
 
-void ofxScrollView::setScrollEasing(float value) {
-    scrollEasing = value;
-}
-
-void ofxScrollView::setUserInteraction(bool bEnable) {
-    if(bUserInteractionEnabled == bEnable) {
-        return;
-    }
-    if(bUserInteractionEnabled == true) {
-        bUserInteractionEnabled = false;
-
-#ifdef TARGET_OPENGLES
-        ofRemoveListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
-        ofRemoveListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
-        ofRemoveListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-#else
-        ofRemoveListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
-        ofRemoveListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
-        ofRemoveListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
-#endif
-        
-    } else {
-        bUserInteractionEnabled = true;
-
-#ifdef TARGET_OPENGLES
-        ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
-        ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
-        ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-#else
-        ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
-        ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
-        ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
-#endif
-    }
-}
-
-void ofxScrollView::setBounceBack(float value) {
-    bounceBack = value;
-}
-
-void ofxScrollView::setDragVelocityDecay(float value) {
-    dragVelDecay = value;
-}
-
-const ofRectangle & ofxScrollView::getWindowRect() {
-    return windowRect;
-}
-
-const ofRectangle & ofxScrollView::getContentRect() {
-    return contentRect;
-}
-
-const ofRectangle & ofxScrollView::getScrollRect() {
-    return scrollRect;
-}
-
 ofVec2f ofxScrollView::getScrollPosition() {
     return ofVec2f(scrollRectEased.x, scrollRectEased.y);
 }
@@ -310,8 +258,66 @@ ofVec2f ofxScrollView::getScrollPositionNorm() {
     return scrollPosEasedNorm;
 }
 
+//--------------------------------------------------------------
+const ofRectangle & ofxScrollView::getWindowRect() {
+    return windowRect;
+}
+
+const ofRectangle & ofxScrollView::getContentRect() {
+    return contentRect;
+}
+
+const ofRectangle & ofxScrollView::getScrollRect() {
+    return scrollRect;
+}
+
 const ofMatrix4x4 & ofxScrollView::getMatrix() {
     return mat;
+}
+
+//--------------------------------------------------------------
+void ofxScrollView::setUserInteraction(bool bEnable) {
+    if(bUserInteractionEnabled == bEnable) {
+        return;
+    }
+    if(bUserInteractionEnabled == true) {
+        bUserInteractionEnabled = false;
+        
+#ifdef TARGET_OPENGLES
+        ofRemoveListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
+        ofRemoveListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
+        ofRemoveListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
+#else
+        ofRemoveListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
+        ofRemoveListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
+        ofRemoveListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
+#endif
+        
+    } else {
+        bUserInteractionEnabled = true;
+        
+#ifdef TARGET_OPENGLES
+        ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
+        ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
+        ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
+#else
+        ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
+        ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
+        ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
+#endif
+    }
+}
+
+void ofxScrollView::setScrollEasing(float value) {
+    scrollEasing = value;
+}
+
+void ofxScrollView::setBounceBack(float value) {
+    bounceBack = value;
+}
+
+void ofxScrollView::setDragVelocityDecay(float value) {
+    dragVelDecay = value;
 }
 
 //--------------------------------------------------------------

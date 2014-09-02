@@ -33,14 +33,17 @@ public:
     
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
+    
     void fitContentToWindow(ofAspectRatioMode aspectRatioMode);
     
     void setZoom(float value);
     void setZoomMin(float value);
     void setZoomMax(float value);
+    
     float getZoom();
     float getZoomMin();
     float getZoomMax();
+    
     bool isZoomed();
     bool isZoomedMin();
     bool isZoomedMax();
@@ -55,16 +58,19 @@ public:
     void setScrollPositionX(float x, bool bEase=true);
     void setScrollPositionY(float y, bool bEase=true);
     void setScrollPosition(float x, float y, bool bEase=true);
-    void setScrollEasing(float value);
-    void setUserInteraction(bool bEnable);
-    void setBounceBack(float value);
-    void setDragVelocityDecay(float value);
+    
+    ofVec2f getScrollPosition();
+    ofVec2f getScrollPositionNorm();
+    
     const ofRectangle & getWindowRect();
     const ofRectangle & getContentRect();
     const ofRectangle & getScrollRect();
-    ofVec2f getScrollPosition();
-    ofVec2f getScrollPositionNorm();
     const ofMatrix4x4 & getMatrix();
+    
+    void setUserInteraction(bool bEnable);
+    void setScrollEasing(float value);
+    void setBounceBack(float value);
+    void setDragVelocityDecay(float value);
     
     virtual void update();
 
