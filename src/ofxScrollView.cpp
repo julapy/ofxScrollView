@@ -62,9 +62,8 @@ void ofxScrollView::setup() {
 }
 
 void ofxScrollView::reset() {
-    scrollRect.x = windowRect.x;
-    scrollRect.y = windowRect.y;
-    scrollPosEased.set(scrollRect.x, scrollRect.y);
+    scrollRect.x = scrollRectEased.x = windowRect.x;
+    scrollRect.y = scrollRectEased.y = windowRect.y;
     scrollPosDown.set(scrollRect.x, scrollRect.y);
     
     dragDownPos.set(0);
@@ -189,10 +188,10 @@ void ofxScrollView::positionContentPointAtWindowPoint(const ofVec2f & contentPoi
     contentPointNorm.y /= contentRect.height;
     
     ofVec2f contentPointInScrollRect = contentPointNorm;
-    contentPointInScrollRect.x *= scrollRect.width;
-    contentPointInScrollRect.y *= scrollRect.height;
-    contentPointInScrollRect.x += scrollRect.x;
-    contentPointInScrollRect.y += scrollRect.y;
+    contentPointInScrollRect.x *= scrollRectEased.width;
+    contentPointInScrollRect.y *= scrollRectEased.height;
+    contentPointInScrollRect.x += scrollRectEased.x;
+    contentPointInScrollRect.y += scrollRectEased.y;
     
     ofVec2f screenPoint = windowPoint;
     screenPoint.x += windowRect.x;
@@ -200,13 +199,8 @@ void ofxScrollView::positionContentPointAtWindowPoint(const ofVec2f & contentPoi
     
     ofVec2f contentPointToScreenPointDifference = screenPoint - contentPointInScrollRect;
     
-    ofVec2f scrollPositionNorm = contentPointToScreenPointDifference;
-    scrollPositionNorm.x += scrollRect.x;
-    scrollPositionNorm.y += scrollRect.y;
-    scrollPositionNorm.x /= scrollRect.width;
-    scrollPositionNorm.y /= scrollRect.height;
-    
-    setScrollPosition(scrollPositionNorm.x, scrollPositionNorm.y);
+    scrollRect.x += contentPointToScreenPointDifference.x;
+    scrollRect.y += contentPointToScreenPointDifference.y;
 }
 
 //--------------------------------------------------------------
@@ -217,7 +211,7 @@ void ofxScrollView::setScrollPositionX(float x, bool bEase) {
     float px = ofClamp(x, 0.0, 1.0);
     scrollRect.x = windowRect.x - (scrollRect.width - windowRect.width) * px;
     if(bEase == false) {
-        scrollPosEased.x = scrollRect.x;
+        scrollRectEased.x = scrollRect.x;
     }
 }
 
@@ -228,7 +222,7 @@ void ofxScrollView::setScrollPositionY(float y, bool bEase) {
     float py = ofClamp(y, 0.0, 1.0);
     scrollRect.y = windowRect.y - (scrollRect.height - windowRect.height) * py;
     if(bEase == false) {
-        scrollPosEased.y = scrollRect.y;
+        scrollRectEased.y = scrollRect.y;
     }
 }
 
@@ -293,11 +287,26 @@ const ofRectangle & ofxScrollView::getScrollRect() {
     return scrollRect;
 }
 
-const ofVec2f & ofxScrollView::getScrollPosition() {
-    return scrollPosEased;
+ofVec2f ofxScrollView::getScrollPosition() {
+    return ofVec2f(scrollRectEased.x, scrollRectEased.y);
 }
 
-const ofVec2f & ofxScrollView::getScrollPositionNorm() {
+ofVec2f ofxScrollView::getScrollPositionNorm() {
+    ofVec2f scrollPosEasedNorm;
+    
+    float dx = windowRect.width - scrollRect.width;
+    float dy = windowRect.height - scrollRect.height;
+    if(dx >= 0) {
+        scrollPosEasedNorm.x = 0;
+    } else {
+        scrollPosEasedNorm.x = ofMap(scrollRectEased.x, dx, 0.0, 1.0, 0.0, true);
+    }
+    if(dy >= 0) {
+        scrollPosEasedNorm.y = 0;
+    } else {
+        scrollPosEasedNorm.y = ofMap(scrollRectEased.y, dy, 0.0, 1.0, 0.0, true);
+    }
+    
     return scrollPosEasedNorm;
 }
 
@@ -379,8 +388,8 @@ void ofxScrollView::update() {
     }
     
     //----------------------------------------------------------
-    scrollRect.width = contentRect.width * scale;
-    scrollRect.height = contentRect.height * scale;
+    scrollRect.width = scrollRectEased.width = contentRect.width * scale;
+    scrollRect.height = scrollRectEased.height = contentRect.height * scale;
     
     //----------------------------------------------------------
     if(bZooming == false) {
@@ -468,23 +477,23 @@ void ofxScrollView::update() {
     
     //----------------------------------------------------------
     if(bFirstUpdate == true) {
-        scrollPosEased.x = scrollRect.x;
-        scrollPosEased.y = scrollRect.y;
+        scrollRectEased.x = scrollRect.x;
+        scrollRectEased.y = scrollRect.y;
     }
-    scrollPosEased.x += (scrollRect.x - scrollPosEased.x) * scrollEasing;
-    scrollPosEased.y += (scrollRect.y - scrollPosEased.y) * scrollEasing;
+    scrollRectEased.x += (scrollRect.x - scrollRectEased.x) * scrollEasing;
+    scrollRectEased.y += (scrollRect.y - scrollRectEased.y) * scrollEasing;
 
-    if(ABS(scrollRect.x - scrollPosEased.x) < kEasingStop) {
-        scrollPosEased.x = scrollRect.x;
+    if(ABS(scrollRect.x - scrollRectEased.x) < kEasingStop) {
+        scrollRectEased.x = scrollRect.x;
     }
-    if(ABS(scrollRect.y - scrollPosEased.y) < kEasingStop) {
-        scrollPosEased.y = scrollRect.y;
+    if(ABS(scrollRect.y - scrollRectEased.y) < kEasingStop) {
+        scrollRectEased.y = scrollRect.y;
     }
     
     //----------------------------------------------------------
     
     mat.makeIdentityMatrix();
-    mat.preMultTranslate(scrollPosEased);
+    mat.preMultTranslate(ofVec2f(scrollRectEased.x, scrollRectEased.y));
     mat.preMultScale(ofVec3f(scale, scale, 1.0));
 
     if(bZooming == true) {
@@ -493,30 +502,14 @@ void ofxScrollView::update() {
         ofVec3f p2 = p0 - p1;
         
         mat.postMultTranslate(p2);
-        scrollPosEased = mat.getTranslation();
-        scrollRect.x = scrollPosEased.x;
-        scrollRect.y = scrollPosEased.y;
+        ofVec3f scrollPosEased = mat.getTranslation();
+        
+        scrollRect.x = scrollRectEased.x = scrollPosEased.x;
+        scrollRect.y = scrollRectEased.y = scrollPosEased.y;
         
     } else {
         
         //
-    }
-    
-    //----------------------------------------------------------
-    scrollRect.x = scrollPosEased.x;
-    scrollRect.y = scrollPosEased.y;
-    
-    float dx = windowRect.width - scrollRect.width;
-    float dy = windowRect.height - scrollRect.height;
-    if(dx >= 0) {
-        scrollPosEasedNorm.x = 0;
-    } else {
-        scrollPosEasedNorm.x = ofMap(scrollPosEased.x, dx, 0.0, 1.0, 0.0, true);
-    }
-    if(dy >= 0) {
-        scrollPosEasedNorm.y = 0;
-    } else {
-        scrollPosEasedNorm.y = ofMap(scrollPosEased.y, dy, 0.0, 1.0, 0.0, true);
     }
     
     //----------------------------------------------------------

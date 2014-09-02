@@ -62,8 +62,8 @@ public:
     const ofRectangle & getWindowRect();
     const ofRectangle & getContentRect();
     const ofRectangle & getScrollRect();
-    const ofVec2f & getScrollPosition();
-    const ofVec2f & getScrollPositionNorm();
+    ofVec2f getScrollPosition();
+    ofVec2f getScrollPositionNorm();
     const ofMatrix4x4 & getMatrix();
     
     virtual void update();
@@ -92,8 +92,7 @@ public:
     ofRectangle contentRect;
 
     ofRectangle scrollRect;
-    ofVec2f scrollPosEased;
-    ofVec2f scrollPosEasedNorm;
+    ofRectangle scrollRectEased;
     ofVec2f scrollPosDown;
     float scrollEasing;
     float bounceBack;
