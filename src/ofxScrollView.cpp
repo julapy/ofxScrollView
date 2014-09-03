@@ -58,6 +58,9 @@ void ofxScrollView::setup() {
     
     reset();
     
+    scrollRect.width = scrollRectEased.width = contentRect.width * scale;
+    scrollRect.height = scrollRectEased.height = contentRect.height * scale;
+    
     //----------------------------------------------------------
     // update once so scrollview is positioned.
     // scrollEasing is set to 1.0 since the update needs
@@ -74,7 +77,6 @@ void ofxScrollView::setup() {
 void ofxScrollView::reset() {
     scrollRect.x = scrollRectEased.x = windowRect.x;
     scrollRect.y = scrollRectEased.y = windowRect.y;
-    scrollPosDown.set(scrollRect.x, scrollRect.y);
     
     dragDownPos.set(0);
     dragMovePos.set(0);
@@ -96,8 +98,6 @@ void ofxScrollView::reset() {
     scale = scaleMin;
     scaleDown = scaleMin;
     mat.makeIdentityMatrix();
-    
-    bFirstUpdate = true;
 }
 
 //--------------------------------------------------------------
@@ -420,9 +420,7 @@ void ofxScrollView::update() {
         scrollRect.height = p1.y - p0.y;
     }
     
-    scrollRect = containRect(scrollRect);
-    
-    cout << scrollRect.x << endl;
+    scrollRect = containRect(scrollRect, bounceBack);
     
     //==========================================================
     // apply easing to scrollRect.
@@ -430,6 +428,8 @@ void ofxScrollView::update() {
     
     scrollRectEased.x += (scrollRect.x - scrollRectEased.x) * scrollEasing;
     scrollRectEased.y += (scrollRect.y - scrollRectEased.y) * scrollEasing;
+    scrollRectEased.width += (scrollRect.width - scrollRectEased.width) * scrollEasing;
+    scrollRectEased.height += (scrollRect.height - scrollRectEased.height) * scrollEasing;
     
     if(ABS(scrollRect.x - scrollRectEased.x) < kEasingStop) {
         scrollRectEased.x = scrollRect.x;
@@ -437,13 +437,18 @@ void ofxScrollView::update() {
     if(ABS(scrollRect.y - scrollRectEased.y) < kEasingStop) {
         scrollRectEased.y = scrollRect.y;
     }
+    if(ABS(scrollRect.width - scrollRectEased.width) < kEasingStop) {
+        scrollRectEased.width = scrollRect.width;
+    }
+    if(ABS(scrollRect.height - scrollRectEased.height) < kEasingStop) {
+        scrollRectEased.height = scrollRect.height;
+    }
     
-    scrollRectEased.width = scrollRect.width;
-    scrollRectEased.height = scrollRect.height;
+    float scaleEased = scrollRectEased.width / contentRect.width;
     
     mat.makeIdentityMatrix();
     mat.preMultTranslate(ofVec3f(scrollRectEased.x, scrollRectEased.y, 0.0));
-    mat.preMultScale(ofVec3f(scale, scale, 1.0));
+    mat.preMultScale(ofVec3f(scaleEased, scaleEased, 1.0));
     
     //==========================================================
     //
@@ -554,61 +559,13 @@ void ofxScrollView::update() {
     }
     
     //----------------------------------------------------------
-    bool bContainPosition = true;
-//    bContainPosition = bContainPosition && (bDragging == false);
-    bContainPosition = bContainPosition && (bZooming == false);
-    
-    if(bContainPosition == true) {
-        scrollRect = containRect(scrollRect);
-    }
-    
-    //----------------------------------------------------------
-    if(bFirstUpdate == true) {
-        scrollRectEased.x = scrollRect.x;
-        scrollRectEased.y = scrollRect.y;
-    }
-    scrollRectEased.x += (scrollRect.x - scrollRectEased.x) * scrollEasing;
-    scrollRectEased.y += (scrollRect.y - scrollRectEased.y) * scrollEasing;
-
-    if(ABS(scrollRect.x - scrollRectEased.x) < kEasingStop) {
-        scrollRectEased.x = scrollRect.x;
-    }
-    if(ABS(scrollRect.y - scrollRectEased.y) < kEasingStop) {
-        scrollRectEased.y = scrollRect.y;
-    }
-    
-    //----------------------------------------------------------
-    
-//    mat.makeIdentityMatrix();
-//    mat.preMultTranslate(ofVec2f(scrollRectEased.x, scrollRectEased.y));
-//    mat.preMultScale(ofVec3f(scale, scale, 1.0));
-//
-//    if(bZooming == true) {
-//        ofVec3f p0(zoomDownPos.x, zoomDownPos.y, 0);
-//        ofVec3f p1(mat.preMult(ofVec3f(zoomDownContentPos.x, zoomDownContentPos.y, 0)));
-//        ofVec3f p2 = p0 - p1;
-//        
-//        mat.postMultTranslate(p2);
-//        ofVec3f scrollPosEased = mat.getTranslation();
-//        
-//        scrollRect.x = scrollRectEased.x = scrollPosEased.x;
-//        scrollRect.y = scrollRectEased.y = scrollPosEased.y;
-//        
-//    } else {
-//        
-//        //
-//    }
-    
-    //----------------------------------------------------------
     if(bAnimationJustFinished == true) {
         bAnimationJustFinished = false;
         zoomCancel();
     }
-    
-    bFirstUpdate = false;
 }
 
-ofRectangle ofxScrollView::containRect(const ofRectangle & rectToContain) {
+ofRectangle ofxScrollView::containRect(const ofRectangle & rectToContain, float easing) {
 
     ofRectangle rect = rectToContain;
     ofRectangle boundingRect = windowRect;
@@ -631,15 +588,27 @@ ofRectangle ofxScrollView::containRect(const ofRectangle & rectToContain) {
     float y1 = boundingRect.y;
     
     if(rect.x < x0) {
-        rect.x = x0;
+        rect.x += (x0 - rect.x) * easing;
+        if(ABS(x0 - rect.x) < kEasingStop) {
+            rect.x = x0;
+        }
     } else if(rect.x > x1) {
-        rect.x = x1;
+        rect.x += (x1 - rect.x) * easing;
+        if(ABS(x1 - rect.x) < kEasingStop) {
+            rect.x = x1;
+        }
     }
     
     if(rect.y < y0) {
-        rect.y = y0;
+        rect.y += (y0 - rect.y) * easing;
+        if(ABS(y0 - rect.y) < kEasingStop) {
+            rect.y = y0;
+        }
     } else if(rect.y > y1) {
-        rect.y = y1;
+        rect.y += (y1 - rect.y) * easing;
+        if(ABS(y1 - rect.y) < kEasingStop) {
+            rect.y = y1;
+        }
     }
     
     return rect;
@@ -668,9 +637,6 @@ void ofxScrollView::exit() {
 void ofxScrollView::dragDown(const ofVec2f & point) {
     dragDownPos = dragMovePos = dragMovePosPrev = point;
     dragVel.set(0);
-    
-    scrollPosDown.x = scrollRect.x;
-    scrollPosDown.y = scrollRect.y;
     
     bDragging = true;
 }

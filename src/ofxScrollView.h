@@ -73,7 +73,7 @@ public:
     void setDragVelocityDecay(float value);
     
     virtual void update();
-    ofRectangle containRect(const ofRectangle & rect);
+    ofRectangle containRect(const ofRectangle & rect, float easing=1.0);
 
     virtual void begin();
     virtual void end();
@@ -91,7 +91,6 @@ public:
     virtual void zoomUp(const ofVec2f & point, float pointDist);
     virtual void zoomCancel();
     
-    bool bFirstUpdate;
     bool bUserInteractionEnabled;
     bool bPinchZoom;
     
@@ -100,7 +99,7 @@ public:
 
     ofRectangle scrollRect;
     ofRectangle scrollRectEased;
-    ofVec2f scrollPosDown;
+    ofRectangle scrollRectAnim;
     float scrollEasing;
     float bounceBack;
     
