@@ -73,6 +73,7 @@ public:
     void setDragVelocityDecay(float value);
     
     virtual void update();
+    ofRectangle containRect(const ofRectangle & rect);
 
     virtual void begin();
     virtual void end();
@@ -109,15 +110,13 @@ public:
     ofVec2f dragVel;
     float dragVelDecay;
     bool bDragging;
-    bool bDraggingChanged;
     
-    ofVec2f zoomDownScreenPos;
-    ofVec2f zoomMoveScreenPos;
-    ofVec2f zoomDownContentPos;
-    float zoomDownPointDist;
-    float zoomMovePointDist;
+    ofVec2f zoomDownPos;
+    ofVec2f zoomMovePos;
+    ofVec2f zoomMovePosPrev;
+    float zoomDownDist;
+    float zoomMoveDist;
     bool bZooming;
-    bool bZoomingChanged;
     
     ofVec2f animPos;
     float animTimeStart;
