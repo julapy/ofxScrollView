@@ -79,26 +79,6 @@ void ofApp::touchUp(ofTouchEventArgs & touch){
 //--------------------------------------------------------------
 void ofApp::touchDoubleTap(ofTouchEventArgs & touch){
     
-    touchPoint.x = touch.x;
-    touchPoint.y = touch.y;
-    
-    float zoomCurrent = scrollView.getZoom();
-    float zoomMax = scrollView.getZoomMax();
-    float zoomMin = scrollView.getZoomMin();
-    float zoomRange = zoomMax - zoomMin;
-    
-    float zoomTarget = 1.0;
-    bool bZoomed = scrollView.isZoomedMax();
-    if(bZoomed == true) {
-        zoomTarget = zoomMin;
-    } else {
-        zoomTarget = zoomMax;
-    }
-    
-    float zoomTimeSec = ABS(zoomTarget - zoomCurrent) / zoomRange;
-    zoomTimeSec *= 0.2;
-    
-    scrollView.zoomTo(touchPoint, zoomTarget, zoomTimeSec);
 }
 
 //--------------------------------------------------------------

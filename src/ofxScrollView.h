@@ -73,7 +73,19 @@ public:
     void setDragVelocityDecay(float value);
     
     virtual void update();
-    ofRectangle containRect(const ofRectangle & rect, float easing=1.0);
+
+    ofRectangle getRectContainedInWindowRect(const ofRectangle & rect,
+                                             float easing=1.0);
+    
+    ofRectangle getRectZoomedAtScreenPoint(const ofVec2f & screenPoint,
+                                           float zoom=0.0);
+    
+    ofRectangle getRectWithContentPointAtWindowPoint(const ofVec2f & contentPoint,
+                                                     const ofVec2f & windowPoint);
+    
+    ofRectangle getRectLerp(const ofRectangle & rectFrom,
+                            const ofRectangle & rectTo,
+                            float progress);
 
     virtual void begin();
     virtual void end();
@@ -99,7 +111,8 @@ public:
 
     ofRectangle scrollRect;
     ofRectangle scrollRectEased;
-    ofRectangle scrollRectAnim;
+    ofRectangle scrollRectAnim0;
+    ofRectangle scrollRectAnim1;
     float scrollEasing;
     float bounceBack;
     
@@ -117,13 +130,10 @@ public:
     float zoomMoveDist;
     bool bZooming;
     
-    ofVec2f animPos;
     float animTimeStart;
     float animTimeTotal;
-    float animZoomTarget;
     bool bAnimating;
-    bool bAnimationJustStarted;
-    bool bAnimationJustFinished;
+    bool bDoubleTap;
     
     float scale;
     float scaleDown;
