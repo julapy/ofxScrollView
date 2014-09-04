@@ -20,6 +20,7 @@ ofxScrollView::ofxScrollView() {
 
 ofxScrollView::~ofxScrollView() {
     setUserInteraction(false);
+    killTouchPoints();
 }
 
 //--------------------------------------------------------------
@@ -99,6 +100,8 @@ void ofxScrollView::setup() {
 }
 
 void ofxScrollView::reset() {
+    killTouchPoints();
+    
     dragDownPos.set(0);
     dragMovePos.set(0);
     dragMovePosPrev.set(0);
@@ -108,10 +111,13 @@ void ofxScrollView::reset() {
     zoomDownPos.set(0);
     zoomMovePos.set(0);
     zoomMovePosPrev.set(0);
-    animTimeStart = 0;
-    animTimeTotal = 0;
     bZooming = false;
+    
+    animTimeStart = 0.0;
+    animTimeTotal = 0.0;
     bAnimating = false;
+    
+    bDoubleTap = false;
     
     scale = scaleMin;
     scaleDown = scaleMin;
@@ -798,4 +804,12 @@ void ofxScrollView::touchDoubleTap(int x, int y, int id) {
 
 void ofxScrollView::touchCancelled(int x, int y, int id) {
     //
+}
+
+//--------------------------------------------------------------
+void ofxScrollView::killTouchPoints() {
+    for(int i=0; i<touchPoints.size(); i++) {
+        delete touchPoints[i];
+    }
+    touchPoints.clear();
 }

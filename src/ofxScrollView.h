@@ -199,5 +199,7 @@ public:
     virtual void touchUp(int x, int y, int id);
     virtual void touchDoubleTap(int x, int y, int id);
     virtual void touchCancelled(int x, int y, int id);
+    
+    void killTouchPoints();
 
 };
