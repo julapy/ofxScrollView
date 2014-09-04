@@ -95,6 +95,8 @@ public:
     ofRectangle getRectLerp(const ofRectangle & rectFrom,
                             const ofRectangle & rectTo,
                             float progress);
+    
+    ofMatrix4x4 getMatrixForRect(const ofRectangle & rect);
 
     virtual void begin();
     virtual void end();

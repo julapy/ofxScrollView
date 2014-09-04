@@ -96,27 +96,9 @@ void ofxScrollView::setup() {
     }
     
     reset();
-    
-    scrollRect.width = scrollRectEased.width = contentRect.width * scale;
-    scrollRect.height = scrollRectEased.height = contentRect.height * scale;
-    
-    //----------------------------------------------------------
-    // update once so scrollview is positioned.
-    // scrollEasing is set to 1.0 since the update needs
-    // to happen straight away with no easing,
-    // and is then reverted back to previous value.
-    //----------------------------------------------------------
-    
-    float scrollEasingSaved = scrollEasing;
-    scrollEasing = 1.0;
-    update();
-    scrollEasing = scrollEasingSaved;
 }
 
 void ofxScrollView::reset() {
-    scrollRect.x = scrollRectEased.x = windowRect.x;
-    scrollRect.y = scrollRectEased.y = windowRect.y;
-    
     dragDownPos.set(0);
     dragMovePos.set(0);
     dragMovePosPrev.set(0);
@@ -133,7 +115,12 @@ void ofxScrollView::reset() {
     
     scale = scaleMin;
     scaleDown = scaleMin;
-    mat.makeIdentityMatrix();
+    
+    scrollRect.width = scrollRectEased.width = contentRect.width * scale;
+    scrollRect.height = scrollRectEased.height = contentRect.height * scale;
+    scrollRect = scrollRectEased = getRectContainedInWindowRect(scrollRect);
+    
+    mat = getMatrixForRect(scrollRect);
 }
 
 //--------------------------------------------------------------
@@ -444,11 +431,7 @@ void ofxScrollView::update() {
         scrollRectEased.height = scrollRect.height;
     }
     
-    float scaleEased = scrollRectEased.width / contentRect.width;
-    
-    mat.makeIdentityMatrix();
-    mat.preMultTranslate(ofVec3f(scrollRectEased.x, scrollRectEased.y, 0.0));
-    mat.preMultScale(ofVec3f(scaleEased, scaleEased, 1.0));
+    mat = getMatrixForRect(scrollRectEased);
 }
 
 ofRectangle ofxScrollView::getRectContainedInWindowRect(const ofRectangle & rectToContain,
@@ -572,6 +555,16 @@ ofRectangle ofxScrollView::getRectLerp(const ofRectangle & rectFrom,
     rect.set(r20, r21);
     
     return rect;
+}
+
+ofMatrix4x4 ofxScrollView::getMatrixForRect(const ofRectangle & rect) {
+    float rectScale = rect.width / contentRect.width;
+    
+    ofMatrix4x4 rectMat;
+    rectMat.preMultTranslate(ofVec3f(rect.x, rect.y, 0.0));
+    rectMat.preMultScale(ofVec3f(rectScale, rectScale, 1.0));
+    
+    return rectMat;
 }
 
 //--------------------------------------------------------------
