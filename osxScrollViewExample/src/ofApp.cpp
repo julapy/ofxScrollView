@@ -94,6 +94,8 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
     
+    // this is a manual way of triggering
+    
     ofVec2f touchPointNew(x, y);
     ofVec2f touchPointDiff = touchPointNew - touchPoint;
     touchPoint = touchPointNew;
@@ -107,23 +109,7 @@ void ofApp::mousePressed(int x, int y, int button){
     bDoubleTap = bDoubleTap && (touchPointDiff.length() < 10);
     
     if(bDoubleTap == true) {
-        float zoomCurrent = scrollView.getZoom();
-        float zoomMax = scrollView.getZoomMax();
-        float zoomMin = scrollView.getZoomMin();
-        float zoomRange = zoomMax - zoomMin;
-
-        float zoomTarget = 1.0;
-        bool bZoomed = scrollView.isZoomedMax();
-        if(bZoomed == true) {
-            zoomTarget = zoomMin;
-        } else {
-            zoomTarget = zoomMax;
-        }
-
-        float zoomTimeSec = ABS(zoomTarget - zoomCurrent) / zoomRange;
-        zoomTimeSec *= 0.4;
-        
-        scrollView.zoomTo(touchPoint, zoomTarget, zoomTimeSec);
+        scrollView.touchDoubleTap(x, y, 0);
     }
 }
 
