@@ -11,37 +11,78 @@ static float const kEasingStop = 0.001;
 
 //--------------------------------------------------------------
 ofxScrollView::ofxScrollView() {
-    bUserInteractionEnabled = false;
-    bPinchZoom = false;
-#ifdef TARGET_OPENGLES
-    bPinchZoom = true;
-#endif
-
-    scrollEasing = 0.5;
-    bounceBack = 1.0;
-    
-    dragVelDecay = 0.9;
-    bDragging = false;
-    
-    zoomDownDist = 0;
-    zoomMoveDist = 0;
-    bZooming = false;
-    
-    animTimeStart = 0;
-    animTimeTotal = 0;
-    bAnimating = false;
-    bDoubleTap = false;
-    
-    scale = 1.0;
-    scaleDown = 1.0;
-    scaleMin = 1.0;
-    scaleMax = 1.0;
-    
     setUserInteraction(true);
+#ifdef TARGET_OPENGLES
+    setPinchZoom(true);
+#endif
+    setDoubleTapZoom(true);
 }
 
 ofxScrollView::~ofxScrollView() {
     setUserInteraction(false);
+}
+
+//--------------------------------------------------------------
+void ofxScrollView::setUserInteraction(bool bEnable) {
+    if(bUserInteractionEnabled == bEnable) {
+        return;
+    }
+    if(bUserInteractionEnabled == true) {
+        bUserInteractionEnabled = false;
+        
+#ifdef TARGET_OPENGLES
+        ofRemoveListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
+        ofRemoveListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
+        ofRemoveListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
+        ofRemoveListener(ofEvents().touchDoubleTap, this, &ofxScrollView::touchDoubleTap);
+#else
+        ofRemoveListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
+        ofRemoveListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
+        ofRemoveListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
+#endif
+        
+    } else {
+        bUserInteractionEnabled = true;
+        
+#ifdef TARGET_OPENGLES
+        ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
+        ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
+        ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
+        ofAddListener(ofEvents().touchDoubleTap, this, &ofxScrollView::touchDoubleTap);
+#else
+        ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
+        ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
+        ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
+#endif
+    }
+}
+
+void ofxScrollView::setPinchZoom(bool value) {
+    bPinchZoomEnabled = value;
+}
+
+void ofxScrollView::setDoubleTapZoom(bool value) {
+    bDoubleTapZoomEnabled = value;
+}
+
+void ofxScrollView::setDoubleTapZoomIncrement(float value) {
+    doubleTapZoomIncrement = value;
+}
+
+void ofxScrollView::setDoubleTapZoomIncrementTimeInSec(float value) {
+    doubleTapZoomIncrementTimeInSec = value;
+}
+
+void ofxScrollView::setScrollEasing(float value) {
+    scrollEasing = value;
+}
+
+void ofxScrollView::setBounceBack(float value) {
+    bounceBack = value;
+}
+
+void ofxScrollView::setDragVelocityDecay(float value) {
+    dragVelDecay = value;
 }
 
 //--------------------------------------------------------------
@@ -129,45 +170,67 @@ void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::setZoom(float value) {
+void ofxScrollView::setScale(float value) {
     scale = value;
     scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
-void ofxScrollView::setZoomMin(float value) {
+void ofxScrollView::setScaleMin(float value) {
     scaleMin = value;
     scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
-void ofxScrollView::setZoomMax(float value) {
+void ofxScrollView::setScaleMax(float value) {
     scaleMax = value;
     scale = ofClamp(scale, scaleMin, scaleMax);
 }
 
 //--------------------------------------------------------------
-float ofxScrollView::getZoom() {
+float ofxScrollView::getScale() {
     return scale;
 }
 
-float ofxScrollView::getZoomMin() {
+float ofxScrollView::getScaleMin() {
     return scaleMin;
 }
 
-float ofxScrollView::getZoomMax() {
+float ofxScrollView::getScaleMax() {
     return scaleMax;
 }
 
 //--------------------------------------------------------------
+void ofxScrollView::setZoom(float value) {
+    float zoom = ofClamp(value, 0.0, 1.0);
+    scale = zoomToScale(zoom);
+}
+
+float ofxScrollView::getZoom() {
+    float zoom = scaleToZoom(scale);
+    return zoom;
+}
+
 bool ofxScrollView::isZoomed() {
-    return (scale > scaleMin);
+    float zoom = getZoom();
+    return (zoom > 0.0);
 }
 
-bool ofxScrollView::isZoomedMin() {
-    return (scale == scaleMin);
+bool ofxScrollView::isZoomedInMax() {
+    float zoom = getZoom();
+    return (zoom == 1.0);
 }
 
-bool ofxScrollView::isZoomedMax() {
-    return (scale == scaleMax);
+bool ofxScrollView::isZoomedOutMax() {
+    float zoom = getZoom();
+    return (zoom == 0.0);
+}
+
+//--------------------------------------------------------------
+float ofxScrollView::zoomToScale(float value) {
+    return ofMap(value, 0.0, 1.0, scaleMin, scaleMax, true);
+}
+
+float ofxScrollView::scaleToZoom(float value) {
+    return ofMap(scale, scaleMin, scaleMax, 0.0, 1.0, true);
 }
 
 //--------------------------------------------------------------
@@ -267,53 +330,6 @@ const ofMatrix4x4 & ofxScrollView::getMatrix() {
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::setUserInteraction(bool bEnable) {
-    if(bUserInteractionEnabled == bEnable) {
-        return;
-    }
-    if(bUserInteractionEnabled == true) {
-        bUserInteractionEnabled = false;
-        
-#ifdef TARGET_OPENGLES
-        ofRemoveListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
-        ofRemoveListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
-        ofRemoveListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-        ofRemoveListener(ofEvents().touchDoubleTap, this, &ofxScrollView::touchDoubleTap);
-#else
-        ofRemoveListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
-        ofRemoveListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
-        ofRemoveListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
-#endif
-        
-    } else {
-        bUserInteractionEnabled = true;
-        
-#ifdef TARGET_OPENGLES
-        ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
-        ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
-        ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-        ofAddListener(ofEvents().touchDoubleTap, this, &ofxScrollView::touchDoubleTap);
-#else
-        ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
-        ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
-        ofAddListener(ofEvents().mouseReleased, this, &ofxScrollView::mouseReleased);
-#endif
-    }
-}
-
-void ofxScrollView::setScrollEasing(float value) {
-    scrollEasing = value;
-}
-
-void ofxScrollView::setBounceBack(float value) {
-    bounceBack = value;
-}
-
-void ofxScrollView::setDragVelocityDecay(float value) {
-    dragVelDecay = value;
-}
-
-//--------------------------------------------------------------
 void ofxScrollView::update() {
     
     if(bAnimating == true) {
@@ -377,7 +393,7 @@ void ofxScrollView::update() {
             float zoomRange = scaleMax - scaleMin;
             float zoomDiff = 0;
             
-            if(bPinchZoom == true) {
+            if(bPinchZoomEnabled == true) {
                 
                 zoomDiff = zoomMoveDist - zoomDownDist;
                 zoomDiff *= 4;
@@ -398,7 +414,7 @@ void ofxScrollView::update() {
                 scale = scaleMax;
             }
             
-            float zoomScale = ofMap(scale, scaleMin, scaleMax, 0.0, 1.0, true);
+            float zoomScale = scaleToZoom(scale);
             ofRectangle rect = getRectZoomedAtScreenPoint(zoomMovePos, zoomScale);
             scrollRect = rect;
         }
@@ -488,7 +504,7 @@ ofRectangle ofxScrollView::getRectContainedInWindowRect(const ofRectangle & rect
 ofRectangle ofxScrollView::getRectZoomedAtScreenPoint(const ofVec2f & screenPoint,
                                                       float zoom) {
     
-    float zoomScale = ofMap(zoom, 0.0, 1.0, scaleMin, scaleMax, true);
+    float zoomScale = zoomToScale(zoom);
     
     ofVec2f contentPoint;
     contentPoint.x = ofMap(screenPoint.x, scrollRect.x, scrollRect.x + scrollRect.width, 0, contentRect.width, true);
@@ -759,6 +775,10 @@ void ofxScrollView::touchUp(int x, int y, int id) {
 }
 
 void ofxScrollView::touchDoubleTap(int x, int y, int id) {
+    if(bDoubleTapZoomEnabled == false) {
+        return;
+    }
+    
     bool bHit = windowRect.inside(x, y);
     if(bHit == false) {
         return;
@@ -768,16 +788,17 @@ void ofxScrollView::touchDoubleTap(int x, int y, int id) {
     
     ofVec2f touchPoint(x, y);
     
-    float zoomCurrent = ofMap(scale, scaleMin, scaleMax, 0.0, 1.0, true);
+    float zoomCurrent = getZoom();
     float zoomTarget = 0.0;
-    if(isZoomedMax() == true) {
-        zoomTarget = 0.0;
+    
+    if(isZoomedInMax() == true) {
+        zoomTarget = 0.0; // zoom all the way out.
     } else {
-        zoomTarget = 1.0;
+        zoomTarget = ofClamp(zoomCurrent + doubleTapZoomIncrement, 0.0, 1.0);
     }
     
     float zoomTimeSec = ABS(zoomTarget - zoomCurrent);
-    zoomTimeSec *= 0.2;
+    zoomTimeSec *= doubleTapZoomIncrementTimeInSec;
     
     zoomTo(touchPoint, zoomTarget, zoomTimeSec);
 }

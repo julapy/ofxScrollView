@@ -27,6 +27,15 @@ public:
     
     ofxScrollView();
     ~ofxScrollView();
+    
+    void setUserInteraction(bool bEnable);
+    void setPinchZoom(bool bEnable);
+    void setDoubleTapZoom(bool bEnable);
+    void setDoubleTapZoomIncrement(float value);
+    void setDoubleTapZoomIncrementTimeInSec(float value);
+    void setScrollEasing(float value);
+    void setBounceBack(float value);
+    void setDragVelocityDecay(float value);
 
     virtual void setup();
     virtual void reset();
@@ -35,18 +44,23 @@ public:
     void setContentRect(const ofRectangle & rect);
     
     void fitContentToWindow(ofAspectRatioMode aspectRatioMode);
+
+    void setScale(float value);
+    void setScaleMin(float value);
+    void setScaleMax(float value);
+    
+    float getScale();
+    float getScaleMin();
+    float getScaleMax();
     
     void setZoom(float value);
-    void setZoomMin(float value);
-    void setZoomMax(float value);
-    
     float getZoom();
-    float getZoomMin();
-    float getZoomMax();
-    
     bool isZoomed();
-    bool isZoomedMin();
-    bool isZoomedMax();
+    bool isZoomedInMax();
+    bool isZoomedOutMax();
+    
+    float zoomToScale(float value);
+    float scaleToZoom(float value);
 
     void zoomTo(const ofVec2f & pos, float zoom, float timeSec=0.0);
     void zoomToMin(const ofVec2f & pos, float timeSec=0.0);
@@ -66,11 +80,6 @@ public:
     const ofRectangle & getContentRect();
     const ofRectangle & getScrollRect();
     const ofMatrix4x4 & getMatrix();
-    
-    void setUserInteraction(bool bEnable);
-    void setScrollEasing(float value);
-    void setBounceBack(float value);
-    void setDragVelocityDecay(float value);
     
     virtual void update();
 
@@ -103,42 +112,46 @@ public:
     virtual void zoomUp(const ofVec2f & point, float pointDist);
     virtual void zoomCancel();
     
-    bool bUserInteractionEnabled;
-    bool bPinchZoom;
-    
     ofRectangle windowRect;
     ofRectangle contentRect;
+    
+    bool bUserInteractionEnabled = false;
+    bool bPinchZoomEnabled = false;
 
     ofRectangle scrollRect;
     ofRectangle scrollRectEased;
     ofRectangle scrollRectAnim0;
     ofRectangle scrollRectAnim1;
-    float scrollEasing;
-    float bounceBack;
+    float scrollEasing = 0.5;
+    float bounceBack = 1.0;
     
     ofVec2f dragDownPos;
     ofVec2f dragMovePos;
     ofVec2f dragMovePosPrev;
     ofVec2f dragVel;
-    float dragVelDecay;
-    bool bDragging;
+    float dragVelDecay = 0.9;
+    bool bDragging = false;
     
     ofVec2f zoomDownPos;
     ofVec2f zoomMovePos;
     ofVec2f zoomMovePosPrev;
-    float zoomDownDist;
-    float zoomMoveDist;
-    bool bZooming;
+    float zoomDownDist = 0;
+    float zoomMoveDist = 0;
+    bool bZooming = false;
     
-    float animTimeStart;
-    float animTimeTotal;
-    bool bAnimating;
-    bool bDoubleTap;
+    float animTimeStart = 0.0;
+    float animTimeTotal = 0.0;
+    bool bAnimating = false;
+
+    bool bDoubleTap = false;
+    bool bDoubleTapZoomEnabled = false;
+    float doubleTapZoomIncrement = 1.0;
+    float doubleTapZoomIncrementTimeInSec = 0.2;
     
-    float scale;
-    float scaleDown;
-    float scaleMin;
-    float scaleMax;
+    float scale = 1.0;
+    float scaleDown = 1.0;
+    float scaleMin = 1.0;
+    float scaleMax = 1.0;
     ofMatrix4x4 mat;
     
     vector<ofxScrollViewTouchPoint *> touchPoints;
