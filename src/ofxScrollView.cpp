@@ -223,14 +223,14 @@ bool ofxScrollView::isZoomedOutMax() {
 //--------------------------------------------------------------
 float ofxScrollView::zoomToScale(float value) {
     if(scaleMin == scaleMax) {
-        return scaleMax;
+        return scaleMin;
     }
     return ofMap(value, 0.0, 1.0, scaleMin, scaleMax, true);
 }
 
 float ofxScrollView::scaleToZoom(float value) {
     if(scaleMin == scaleMax) {
-        return 1.0;
+        return 0.0;
     }
     return ofMap(scale, scaleMin, scaleMax, 0.0, 1.0, true);
 }
