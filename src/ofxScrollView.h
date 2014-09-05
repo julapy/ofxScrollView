@@ -69,11 +69,11 @@ public:
     void zoomToContentPointAndPositionAtScreenPoint(const ofVec2f & contentPoint,
                                                     const ofVec2f & screenPoint,
                                                     float zoom,
-                                                    float timeSec);
+                                                    float timeSec=0.0);
+    void moveContentPointToScreenPoint(const ofVec2f & contentPoint,
+                                       const ofVec2f & screenPoint,
+                                       float timeSec=0.0);
     bool animStart(float animTimeInSec);
-    
-    void positionContentPointAtScreenPoint(const ofVec2f & contentPoint,
-                                           const ofVec2f & screenPoint);
     
     void setScrollPositionX(float x, bool bEase=true);
     void setScrollPositionY(float y, bool bEase=true);

@@ -272,6 +272,20 @@ void ofxScrollView::zoomToContentPointAndPositionAtScreenPoint(const ofVec2f & c
     scrollRectAnim1 = getRectContainedInWindowRect(scrollRectAnim1);
 }
 
+void ofxScrollView::moveContentPointToScreenPoint(const ofVec2f & contentPoint,
+                                                  const ofVec2f & screenPoint,
+                                                  float timeSec) {
+    bool bValid = animStart(timeSec);
+    if(bValid == false) {
+        return;
+    }
+
+    scrollRectAnim0 = scrollRect;
+    scrollRectAnim1 = scrollRect;
+    scrollRectAnim1 = getRectWithContentPointAtScreenPoint(scrollRectAnim1, contentPoint, screenPoint);
+}
+
+
 bool ofxScrollView::animStart(float animTimeInSec) {
     bAnimating = true;
 
@@ -284,14 +298,6 @@ bool ofxScrollView::animStart(float animTimeInSec) {
     }
     
     return bAnimating;
-}
-
-//--------------------------------------------------------------
-void ofxScrollView::positionContentPointAtScreenPoint(const ofVec2f & contentPoint,
-                                                      const ofVec2f & screenPoint) {
-    
-    ofRectangle rect = getRectWithContentPointAtScreenPoint(scrollRect, contentPoint, screenPoint);
-    scrollRect = rect;
 }
 
 //--------------------------------------------------------------
