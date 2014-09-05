@@ -63,12 +63,17 @@ public:
     float zoomToScale(float value);
     float scaleToZoom(float value);
 
-    void zoomTo(const ofVec2f & pos, float zoom, float timeSec=0.0);
-    void zoomToMin(const ofVec2f & pos, float timeSec=0.0);
-    void zoomToMax(const ofVec2f & pos, float timeSec=0.0);
+    void zoomToMin(const ofVec2f & screenPoint, float timeSec=0.0);
+    void zoomToMax(const ofVec2f & screenPoint, float timeSec=0.0);
+    void zoomTo(const ofVec2f & screenPoint, float zoom, float timeSec=0.0);
+    void zoomToContentPointAndPositionAtScreenPoint(const ofVec2f & contentPoint,
+                                                    const ofVec2f & screenPoint,
+                                                    float zoom,
+                                                    float timeSec);
+    bool animStart(float animTimeInSec);
     
-    void positionContentPointAtWindowPoint(const ofVec2f & contentPoint,
-                                           const ofVec2f & windowPoint);
+    void positionContentPointAtScreenPoint(const ofVec2f & contentPoint,
+                                           const ofVec2f & screenPoint);
     
     void setScrollPositionX(float x, bool bEase=true);
     void setScrollPositionY(float y, bool bEase=true);
@@ -84,21 +89,31 @@ public:
     
     virtual void update();
 
+    //-------------------------------------------------------------- the brains!
     ofRectangle getRectContainedInWindowRect(const ofRectangle & rect,
                                              float easing=1.0);
     
-    ofRectangle getRectZoomedAtScreenPoint(const ofVec2f & screenPoint,
+    ofRectangle getRectZoomedAtScreenPoint(const ofRectangle & rect,
+                                           const ofVec2f & screenPoint,
                                            float zoom=0.0);
     
-    ofRectangle getRectWithContentPointAtWindowPoint(const ofVec2f & contentPoint,
-                                                     const ofVec2f & windowPoint);
+    ofRectangle getRectWithContentPointAtScreenPoint(const ofRectangle & rect,
+                                                     const ofVec2f & contentPoint,
+                                                     const ofVec2f & screenPoint);
     
     ofRectangle getRectLerp(const ofRectangle & rectFrom,
                             const ofRectangle & rectTo,
                             float progress);
     
     ofMatrix4x4 getMatrixForRect(const ofRectangle & rect);
+    
+    ofVec2f getContentPointAtScreenPoint(const ofRectangle & rect,
+                                         const ofVec2f & screenPoint);
+    
+    ofVec2f getScreenPointAtContentPoint(const ofRectangle & rect,
+                                         const ofVec2f & contentPoint);
 
+    //--------------------------------------------------------------
     virtual void begin();
     virtual void end();
     virtual void draw();
@@ -149,8 +164,8 @@ public:
     bool bDoubleTapZoomEnabled = false;
     float doubleTapZoomIncrement = 1.0;
     float doubleTapZoomIncrementTimeInSec = 0.2;
-    float doubleTapRegistrationTimeInSec = 0.2;
-    float doubleTapRegistrationDistanceInPixels = 10;
+    float doubleTapRegistrationTimeInSec = 0.25;
+    float doubleTapRegistrationDistanceInPixels = 22;
     
     float scale = 1.0;
     float scaleDown = 1.0;

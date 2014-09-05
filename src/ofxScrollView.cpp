@@ -222,42 +222,75 @@ bool ofxScrollView::isZoomedOutMax() {
 
 //--------------------------------------------------------------
 float ofxScrollView::zoomToScale(float value) {
+    if(scaleMin == scaleMax) {
+        return scaleMax;
+    }
     return ofMap(value, 0.0, 1.0, scaleMin, scaleMax, true);
 }
 
 float ofxScrollView::scaleToZoom(float value) {
+    if(scaleMin == scaleMax) {
+        return 1.0;
+    }
     return ofMap(scale, scaleMin, scaleMax, 0.0, 1.0, true);
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::zoomTo(const ofVec2f & pos, float zoom, float timeSec) {
-    animTimeStart = ofGetElapsedTimef();
-    animTimeTotal = MAX(timeSec, 0.0);
-    if(animTimeTotal < 0.001) {
-        animTimeTotal = 0;
+void ofxScrollView::zoomToMin(const ofVec2f & screenPoint, float timeSec) {
+    zoomTo(screenPoint, scaleMin, timeSec);
+}
+
+void ofxScrollView::zoomToMax(const ofVec2f & screenPoint, float timeSec) {
+    zoomTo(screenPoint, scaleMax, timeSec);
+}
+
+void ofxScrollView::zoomTo(const ofVec2f & screenPoint, float zoom, float timeSec) {
+    bool bValid = animStart(timeSec);
+    if(bValid == false) {
         return;
     }
     
     scrollRectAnim0 = scrollRect;
-    scrollRectAnim1 = getRectZoomedAtScreenPoint(pos, zoom);
+    scrollRectAnim1 = scrollRect;
+    scrollRectAnim1 = getRectZoomedAtScreenPoint(scrollRectAnim1, screenPoint, zoom);
     scrollRectAnim1 = getRectContainedInWindowRect(scrollRectAnim1);
-    
+}
+
+void ofxScrollView::zoomToContentPointAndPositionAtScreenPoint(const ofVec2f & contentPoint,
+                                                               const ofVec2f & screenPoint,
+                                                               float zoom,
+                                                               float timeSec) {
+    bool bValid = animStart(timeSec);
+    if(bValid == false) {
+        return;
+    }
+
+    scrollRectAnim0 = scrollRect;
+    scrollRectAnim1 = scrollRect;
+    scrollRectAnim1 = getRectWithContentPointAtScreenPoint(scrollRectAnim1, contentPoint, screenPoint);
+    scrollRectAnim1 = getRectZoomedAtScreenPoint(scrollRectAnim1, screenPoint, zoom);
+    scrollRectAnim1 = getRectContainedInWindowRect(scrollRectAnim1);
+}
+
+bool ofxScrollView::animStart(float animTimeInSec) {
     bAnimating = true;
-}
 
-void ofxScrollView::zoomToMin(const ofVec2f & pos, float timeSec) {
-    zoomTo(pos, scaleMin, timeSec);
-}
-
-void ofxScrollView::zoomToMax(const ofVec2f & pos, float timeSec) {
-    zoomTo(pos, scaleMax, timeSec);
+    animTimeStart = ofGetElapsedTimef();
+    animTimeTotal = MAX(animTimeInSec, 0.0);
+    
+    if(animTimeTotal < 0.001) {
+        animTimeTotal = 0;
+        bAnimating = false;
+    }
+    
+    return bAnimating;
 }
 
 //--------------------------------------------------------------
-void ofxScrollView::positionContentPointAtWindowPoint(const ofVec2f & contentPoint,
-                                                      const ofVec2f & windowPoint) {
+void ofxScrollView::positionContentPointAtScreenPoint(const ofVec2f & contentPoint,
+                                                      const ofVec2f & screenPoint) {
     
-    ofRectangle rect = getRectWithContentPointAtWindowPoint(contentPoint, windowPoint);
+    ofRectangle rect = getRectWithContentPointAtScreenPoint(scrollRect, contentPoint, screenPoint);
     scrollRect = rect;
 }
 
@@ -415,7 +448,7 @@ void ofxScrollView::update() {
             }
             
             float zoomScale = scaleToZoom(scale);
-            ofRectangle rect = getRectZoomedAtScreenPoint(zoomMovePos, zoomScale);
+            ofRectangle rect = getRectZoomedAtScreenPoint(scrollRect, zoomMovePos, zoomScale);
             scrollRect = rect;
         }
     }
@@ -447,6 +480,7 @@ void ofxScrollView::update() {
     mat = getMatrixForRect(scrollRectEased);
 }
 
+//-------------------------------------------------------------- the brains!
 ofRectangle ofxScrollView::getRectContainedInWindowRect(const ofRectangle & rectToContain,
                                                         float easing) {
 
@@ -497,14 +531,13 @@ ofRectangle ofxScrollView::getRectContainedInWindowRect(const ofRectangle & rect
     return rect;
 }
 
-ofRectangle ofxScrollView::getRectZoomedAtScreenPoint(const ofVec2f & screenPoint,
+ofRectangle ofxScrollView::getRectZoomedAtScreenPoint(const ofRectangle & rect,
+                                                      const ofVec2f & screenPoint,
                                                       float zoom) {
     
     float zoomScale = zoomToScale(zoom);
     
-    ofVec2f contentPoint;
-    contentPoint.x = ofMap(screenPoint.x, scrollRect.x, scrollRect.x + scrollRect.width, 0, contentRect.width, true);
-    contentPoint.y = ofMap(screenPoint.y, scrollRect.y, scrollRect.y + scrollRect.height, 0, contentRect.height, true);
+    ofVec2f contentPoint = getContentPointAtScreenPoint(rect, screenPoint);
     
     ofVec2f p0(0, 0);
     ofVec2f p1(contentRect.width, contentRect.height);
@@ -515,40 +548,28 @@ ofRectangle ofxScrollView::getRectZoomedAtScreenPoint(const ofVec2f & screenPoin
     p0 += screenPoint;
     p1 += screenPoint;
     
-    ofRectangle rect;
-    rect.x = p0.x;
-    rect.y = p0.y;
-    rect.width = p1.x - p0.x;
-    rect.height = p1.y - p0.y;
+    ofRectangle rectNew;
+    rectNew.x = p0.x;
+    rectNew.y = p0.y;
+    rectNew.width = p1.x - p0.x;
+    rectNew.height = p1.y - p0.y;
     
-    return rect;
+    return rectNew;
 }
 
-ofRectangle ofxScrollView::getRectWithContentPointAtWindowPoint(const ofVec2f & contentPoint,
-                                                                const ofVec2f & windowPoint) {
+ofRectangle ofxScrollView::getRectWithContentPointAtScreenPoint(const ofRectangle & rect,
+                                                                const ofVec2f & contentPoint,
+                                                                const ofVec2f & screenPoint) {
     
-    ofVec2f contentPointNorm = contentPoint;
-    contentPointNorm.x /= contentRect.width;
-    contentPointNorm.y /= contentRect.height;
+    ofVec2f contentScreenPoint = getScreenPointAtContentPoint(rect, contentPoint);
+    ofVec2f contentPointToScreenPointDifference = screenPoint - contentScreenPoint;
     
-    ofVec2f contentPointInScrollRect = contentPointNorm;
-    contentPointInScrollRect.x *= scrollRectEased.width;
-    contentPointInScrollRect.y *= scrollRectEased.height;
-    contentPointInScrollRect.x += scrollRectEased.x;
-    contentPointInScrollRect.y += scrollRectEased.y;
+    ofRectangle rectNew;
+    rectNew = scrollRect;
+    rectNew.x += contentPointToScreenPointDifference.x;
+    rectNew.y += contentPointToScreenPointDifference.y;
     
-    ofVec2f screenPoint = windowPoint;
-    screenPoint.x += windowRect.x;
-    screenPoint.y += windowRect.y;
-    
-    ofVec2f contentPointToScreenPointDifference = screenPoint - contentPointInScrollRect;
-    
-    ofRectangle rect;
-    rect = scrollRect;
-    rect.x += contentPointToScreenPointDifference.x;
-    rect.y += contentPointToScreenPointDifference.y;
-    
-    return rect;
+    return rectNew;
 }
 
 ofRectangle ofxScrollView::getRectLerp(const ofRectangle & rectFrom,
@@ -571,6 +592,7 @@ ofRectangle ofxScrollView::getRectLerp(const ofRectangle & rectFrom,
 }
 
 ofMatrix4x4 ofxScrollView::getMatrixForRect(const ofRectangle & rect) {
+    
     float rectScale = rect.width / contentRect.width;
     
     ofMatrix4x4 rectMat;
@@ -579,6 +601,25 @@ ofMatrix4x4 ofxScrollView::getMatrixForRect(const ofRectangle & rect) {
     
     return rectMat;
 }
+
+ofVec2f ofxScrollView::getContentPointAtScreenPoint(const ofRectangle & rect,
+                                                    const ofVec2f & screenPoint) {
+    
+    ofVec2f contentPoint;
+    contentPoint.x = ofMap(screenPoint.x, rect.x, rect.x + rect.width, 0, contentRect.width, true);
+    contentPoint.y = ofMap(screenPoint.y, rect.y, rect.y + rect.height, 0, contentRect.height, true);
+    return contentPoint;
+}
+
+ofVec2f ofxScrollView::getScreenPointAtContentPoint(const ofRectangle & rect,
+                                                    const ofVec2f & contentPoint) {
+    
+    ofVec2f screenPoint;
+    screenPoint.x = ofMap(contentPoint.x, 0, contentRect.width, rect.x, rect.x + rect.width, true);
+    screenPoint.y = ofMap(contentPoint.y, 0, contentRect.height, rect.y, rect.y + rect.height, true);
+    return screenPoint;
+}
+
 
 //--------------------------------------------------------------
 void ofxScrollView::begin() {
