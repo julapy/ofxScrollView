@@ -1,4 +1,9 @@
 ofxScrollView
 =============
 
-openFrameworks addon for creating a iOS style ScrollView which supports pan and zoom.
+ofxScrollView is an openFrameworks addon for panning and zooming content, graphics, or anything else you want to draw inside it.
+
+Check out the osx and ios examples which demo how to use it.
+Also works across all OF supported platforms, andriod, linux, etc.
+
+Hit me up if you have any suggestions or feature requests.
