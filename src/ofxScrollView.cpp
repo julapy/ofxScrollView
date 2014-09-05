@@ -20,7 +20,6 @@ ofxScrollView::ofxScrollView() {
 
 ofxScrollView::~ofxScrollView() {
     setUserInteraction(false);
-    killTouchPoints();
 }
 
 //--------------------------------------------------------------
@@ -35,7 +34,6 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
         ofRemoveListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
         ofRemoveListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
         ofRemoveListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-        ofRemoveListener(ofEvents().touchDoubleTap, this, &ofxScrollView::touchDoubleTap);
 #else
         ofRemoveListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
         ofRemoveListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
@@ -49,7 +47,6 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
         ofAddListener(ofEvents().touchDown, this, &ofxScrollView::touchDown);
         ofAddListener(ofEvents().touchMoved, this, &ofxScrollView::touchMoved);
         ofAddListener(ofEvents().touchUp, this, &ofxScrollView::touchUp);
-        ofAddListener(ofEvents().touchDoubleTap, this, &ofxScrollView::touchDoubleTap);
 #else
         ofAddListener(ofEvents().mousePressed, this, &ofxScrollView::mousePressed);
         ofAddListener(ofEvents().mouseDragged, this, &ofxScrollView::mouseDragged);
@@ -60,6 +57,18 @@ void ofxScrollView::setUserInteraction(bool bEnable) {
 
 void ofxScrollView::setPinchZoom(bool value) {
     bPinchZoomEnabled = value;
+}
+
+void ofxScrollView::setScrollEasing(float value) {
+    scrollEasing = value;
+}
+
+void ofxScrollView::setBounceBack(float value) {
+    bounceBack = value;
+}
+
+void ofxScrollView::setDragVelocityDecay(float value) {
+    dragVelDecay = value;
 }
 
 void ofxScrollView::setDoubleTapZoom(bool value) {
@@ -74,16 +83,12 @@ void ofxScrollView::setDoubleTapZoomIncrementTimeInSec(float value) {
     doubleTapZoomIncrementTimeInSec = value;
 }
 
-void ofxScrollView::setScrollEasing(float value) {
-    scrollEasing = value;
+void ofxScrollView::setDoubleTapRegistrationTimeInSec(float value) {
+    doubleTapRegistrationTimeInSec = value;
 }
 
-void ofxScrollView::setBounceBack(float value) {
-    bounceBack = value;
-}
-
-void ofxScrollView::setDragVelocityDecay(float value) {
-    dragVelDecay = value;
+void ofxScrollView::setDoubleTapRegistrationDistanceInPixels(float value) {
+    doubleTapRegistrationDistanceInPixels = value;
 }
 
 //--------------------------------------------------------------
@@ -100,7 +105,7 @@ void ofxScrollView::setup() {
 }
 
 void ofxScrollView::reset() {
-    killTouchPoints();
+    touchPoints.clear();
     
     dragDownPos.set(0);
     dragMovePos.set(0);
@@ -116,8 +121,6 @@ void ofxScrollView::reset() {
     animTimeStart = 0.0;
     animTimeTotal = 0.0;
     bAnimating = false;
-    
-    bDoubleTap = false;
     
     scale = scaleMin;
     scaleDown = scaleMin;
@@ -230,6 +233,10 @@ float ofxScrollView::scaleToZoom(float value) {
 void ofxScrollView::zoomTo(const ofVec2f & pos, float zoom, float timeSec) {
     animTimeStart = ofGetElapsedTimef();
     animTimeTotal = MAX(timeSec, 0.0);
+    if(animTimeTotal < 0.001) {
+        animTimeTotal = 0;
+        return;
+    }
     
     scrollRectAnim0 = scrollRect;
     scrollRectAnim1 = getRectZoomedAtScreenPoint(pos, zoom);
@@ -675,28 +682,53 @@ void ofxScrollView::touchDown(int x, int y, int id) {
     if(bHit == false) {
         return;
     }
+
+    ofxScrollViewTouchPoint touchPointNew;
+    touchPointNew.touchPos.set(x, y);
+    touchPointNew.touchID = id;
+    touchPointNew.touchDownTimeInSec = ofGetElapsedTimef();
     
-    if(bDoubleTap == true) {
-        bDoubleTap = false;
+    //---------------------------------------------------------- double tap.
+    ofVec2f touchPointDiff = touchPointNew.touchPos - touchDownPointLast.touchPos;
+    float touchTimeDiff = touchPointNew.touchDownTimeInSec - touchDownPointLast.touchDownTimeInSec;
+    
+    touchDownPointLast = touchPointNew;
+    
+    bool bDoubleTap = true;
+    bDoubleTap = bDoubleTap && (touchTimeDiff < doubleTapRegistrationTimeInSec);
+    bDoubleTap = bDoubleTap && (touchPointDiff.length() < doubleTapRegistrationDistanceInPixels);
+    
+    if(bDoubleTapZoomEnabled == true &&
+       bDoubleTap == true) {
+        
+        dragCancel();
+        zoomCancel();
+
+        touchPoints.clear();
+        touchDownPointLast.touchPos.set(0, 0);
+        touchDownPointLast.touchDownTimeInSec = 0.0;
+        
+        touchDoubleTap(x, y, id);
         return;
     }
     
+    //----------------------------------------------------------
     if(touchPoints.size() >= 2) {
         // max 2 touches.
         return;
     }
     
-    touchPoints.push_back(new ofxScrollViewTouchPoint(x, y, id));
+    touchPoints.push_back(touchPointNew);
     
     if(touchPoints.size() == 1) {
         
         zoomCancel();
-        dragDown(touchPoints[0]->touchPos);
+        dragDown(touchPoints[0].touchPos);
         
     } else if(touchPoints.size() == 2) {
         
-        ofVec2f tp0(touchPoints[0]->touchPos);
-        ofVec2f tp1(touchPoints[1]->touchPos);
+        ofVec2f tp0(touchPoints[0].touchPos);
+        ofVec2f tp1(touchPoints[1].touchPos);
         ofVec2f tmp = (tp1 - tp0) * 0.5 + tp0;
         float dist = (tp1 - tp0).length();
         
@@ -708,7 +740,7 @@ void ofxScrollView::touchDown(int x, int y, int id) {
 void ofxScrollView::touchMoved(int x, int y, int id) {
     int touchIndex = -1;
     for(int i=0; i<touchPoints.size(); i++) {
-        ofxScrollViewTouchPoint & touchPoint = *touchPoints[i];
+        ofxScrollViewTouchPoint & touchPoint = touchPoints[i];
         if(touchPoint.touchID == id) {
             touchPoint.touchPos.x = x;
             touchPoint.touchPos.y = y;
@@ -723,12 +755,12 @@ void ofxScrollView::touchMoved(int x, int y, int id) {
     
     if(touchPoints.size() == 1) {
         
-        dragMoved(touchPoints[0]->touchPos);
+        dragMoved(touchPoints[0].touchPos);
         
     } else if(touchPoints.size() == 2) {
         
-        ofVec2f tp0(touchPoints[0]->touchPos);
-        ofVec2f tp1(touchPoints[1]->touchPos);
+        ofVec2f tp0(touchPoints[0].touchPos);
+        ofVec2f tp1(touchPoints[1].touchPos);
         ofVec2f tmp = (tp1 - tp0) * 0.5 + tp0;
         float dist = (tp1 - tp0).length();
         
@@ -739,7 +771,7 @@ void ofxScrollView::touchMoved(int x, int y, int id) {
 void ofxScrollView::touchUp(int x, int y, int id) {
     int touchIndex = -1;
     for(int i=0; i<touchPoints.size(); i++) {
-        ofxScrollViewTouchPoint & touchPoint = *touchPoints[i];
+        ofxScrollViewTouchPoint & touchPoint = touchPoints[i];
         if(touchPoint.touchID == id) {
             touchPoint.touchPos.x = x;
             touchPoint.touchPos.y = y;
@@ -754,22 +786,18 @@ void ofxScrollView::touchUp(int x, int y, int id) {
     
     if(touchPoints.size() == 1) {
         
-        dragUp(touchPoints[0]->touchPos);
+        dragUp(touchPoints[0].touchPos);
         
     } else if(touchPoints.size() == 2) {
      
-        ofVec2f tp0(touchPoints[0]->touchPos);
-        ofVec2f tp1(touchPoints[1]->touchPos);
+        ofVec2f tp0(touchPoints[0].touchPos);
+        ofVec2f tp1(touchPoints[1].touchPos);
         ofVec2f tmp = (tp1 - tp0) * 0.5 + tp0;
         float dist = (tp1 - tp0).length();
         
         zoomUp(tmp, dist);
     }
     
-    for(int i=0; i<touchPoints.size(); i++) {
-        delete touchPoints[i];
-        touchPoints[i] = NULL;
-    }
     touchPoints.clear();
 }
 
@@ -782,8 +810,6 @@ void ofxScrollView::touchDoubleTap(int x, int y, int id) {
     if(bHit == false) {
         return;
     }
-    
-    bDoubleTap = true;
     
     ofVec2f touchPoint(x, y);
     
@@ -804,12 +830,4 @@ void ofxScrollView::touchDoubleTap(int x, int y, int id) {
 
 void ofxScrollView::touchCancelled(int x, int y, int id) {
     //
-}
-
-//--------------------------------------------------------------
-void ofxScrollView::killTouchPoints() {
-    for(int i=0; i<touchPoints.size(); i++) {
-        delete touchPoints[i];
-    }
-    touchPoints.clear();
 }

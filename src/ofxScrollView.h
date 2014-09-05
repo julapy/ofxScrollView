@@ -11,13 +11,12 @@
 //--------------------------------------------------------------
 class ofxScrollViewTouchPoint {
 public:
-    ofxScrollViewTouchPoint(int x, int y, int id) {
-        touchID = id;
-        touchPos.x = x;
-        touchPos.y = y;
+    ofxScrollViewTouchPoint() {
+        //
     }
-    int touchID;
+    int touchID = 0;
     ofVec2f touchPos;
+    float touchDownTimeInSec = 0;
 };
 
 //--------------------------------------------------------------
@@ -30,12 +29,14 @@ public:
     
     void setUserInteraction(bool bEnable);
     void setPinchZoom(bool bEnable);
-    void setDoubleTapZoom(bool bEnable);
-    void setDoubleTapZoomIncrement(float value);
-    void setDoubleTapZoomIncrementTimeInSec(float value);
     void setScrollEasing(float value);
     void setBounceBack(float value);
     void setDragVelocityDecay(float value);
+    void setDoubleTapZoom(bool bEnable);
+    void setDoubleTapZoomIncrement(float value);
+    void setDoubleTapZoomIncrementTimeInSec(float value);
+    void setDoubleTapRegistrationTimeInSec(float value);
+    void setDoubleTapRegistrationDistanceInPixels(float value);
 
     virtual void setup();
     virtual void reset();
@@ -145,10 +146,11 @@ public:
     float animTimeTotal = 0.0;
     bool bAnimating = false;
 
-    bool bDoubleTap = false;
     bool bDoubleTapZoomEnabled = false;
     float doubleTapZoomIncrement = 1.0;
     float doubleTapZoomIncrementTimeInSec = 0.2;
+    float doubleTapRegistrationTimeInSec = 0.2;
+    float doubleTapRegistrationDistanceInPixels = 10;
     
     float scale = 1.0;
     float scaleDown = 1.0;
@@ -156,7 +158,8 @@ public:
     float scaleMax = 1.0;
     ofMatrix4x4 mat;
     
-    vector<ofxScrollViewTouchPoint *> touchPoints;
+    vector<ofxScrollViewTouchPoint> touchPoints;
+    ofxScrollViewTouchPoint touchDownPointLast;
     
     //----------------------------------------------------------
     virtual void mouseMoved(ofMouseEventArgs & mouse){
@@ -199,7 +202,4 @@ public:
     virtual void touchUp(int x, int y, int id);
     virtual void touchDoubleTap(int x, int y, int id);
     virtual void touchCancelled(int x, int y, int id);
-    
-    void killTouchPoints();
-
 };

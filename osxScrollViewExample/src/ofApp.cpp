@@ -20,14 +20,23 @@ void ofApp::setup(){
     contentRect.width = grid.getWidth();
     contentRect.height = grid.getHeight();
     
-    scrollView.setWindowRect(windowRect);
-    scrollView.setContentRect(contentRect);
-    scrollView.fitContentToWindow(OF_ASPECT_RATIO_KEEP); // works with ofAspectRatioMode values.
+    //----------------------------------------------------------
+    scrollView.setWindowRect(windowRect); // window size and position of scroll view.
+    scrollView.setContentRect(contentRect); // the pixel size of the content being displayed in scroll view.
+    scrollView.fitContentToWindow(OF_ASPECT_RATIO_KEEP); // fits content into window, works with ofAspectRatioMode values.
+    
     scrollView.setScrollEasing(0.3); // smoothness of scrolling, between 0 and 1.
     scrollView.setBounceBack(0.3); // the speed of bounce back, between 0 and 1.
     scrollView.setDragVelocityDecay(0.9); // the speed of decay of drag velocity after release, between 0 and 1.
     scrollView.setUserInteraction(true); // enable / disable mouse or touch interaction.
-    scrollView.setup();
+
+    scrollView.setDoubleTapZoom(true); // enable double tap zoom.
+    scrollView.setDoubleTapZoomIncrement(1.0); // the increment value of zoom on double tap, between 0 and 1.
+    scrollView.setDoubleTapZoomIncrementTimeInSec(0.3); // the time amount of time for zoom increment.
+    scrollView.setDoubleTapRegistrationTimeInSec(0.25); // the time threshold between taps for double tap event to register.
+    scrollView.setDoubleTapRegistrationDistanceInPixels(20); // the distance threshold between taps for double tap event to register.
+    
+    scrollView.setup(); // setup must always be called at the end of scroll view config.
 }
 
 //--------------------------------------------------------------
@@ -93,24 +102,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-    
-    // this is a manual way of triggering
-    
-    ofVec2f touchPointNew(x, y);
-    ofVec2f touchPointDiff = touchPointNew - touchPoint;
-    touchPoint = touchPointNew;
-    
-    float touchTimeNow = ofGetElapsedTimef();
-    float touchTimeDiff = touchTimeNow - touchTime;
-    touchTime = touchTimeNow;
-    
-    bool bDoubleTap = true;
-    bDoubleTap = bDoubleTap && (touchTimeDiff < 0.2);
-    bDoubleTap = bDoubleTap && (touchPointDiff.length() < 10);
-    
-    if(bDoubleTap == true) {
-        scrollView.touchDoubleTap(x, y, 0);
-    }
+
 }
 
 //--------------------------------------------------------------
