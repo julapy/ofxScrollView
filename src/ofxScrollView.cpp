@@ -240,7 +240,7 @@ float ofxScrollView::scaleToZoom(float value) {
     if(scaleMin == scaleMax) {
         return 0.0;
     }
-    return ofMap(scale, scaleMin, scaleMax, 0.0, 1.0, true);
+    return ofMap(value, scaleMin, scaleMax, 0.0, 1.0, true);
 }
 
 //--------------------------------------------------------------
