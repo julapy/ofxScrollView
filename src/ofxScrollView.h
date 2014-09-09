@@ -33,6 +33,8 @@ public:
     void setBounceBack(float value);
     void setDragVelocityDecay(float value);
     void setDoubleTapZoom(bool bEnable);
+    void setDoubleTapZoomRangeMin(float value);
+    void setDoubleTapZoomRangeMax(float value);
     void setDoubleTapZoomIncrement(float value);
     void setDoubleTapZoomIncrementTimeInSec(float value);
     void setDoubleTapRegistrationTimeInSec(float value);
@@ -162,6 +164,8 @@ public:
     bool bAnimating = false;
 
     bool bDoubleTapZoomEnabled = false;
+    float doubleTapZoomRangeMin = 0.0;
+    float doubleTapZoomRangeMax = 1.0;
     float doubleTapZoomIncrement = 1.0;
     float doubleTapZoomIncrementTimeInSec = 0.2;
     float doubleTapRegistrationTimeInSec = 0.25;

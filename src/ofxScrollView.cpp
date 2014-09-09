@@ -75,6 +75,14 @@ void ofxScrollView::setDoubleTapZoom(bool value) {
     bDoubleTapZoomEnabled = value;
 }
 
+void ofxScrollView::setDoubleTapZoomRangeMin(float value) {
+    doubleTapZoomRangeMin = value;
+}
+
+void ofxScrollView::setDoubleTapZoomRangeMax(float value) {
+    doubleTapZoomRangeMax = value;
+}
+
 void ofxScrollView::setDoubleTapZoomIncrement(float value) {
     doubleTapZoomIncrement = value;
 }
@@ -245,44 +253,47 @@ void ofxScrollView::zoomToMax(const ofVec2f & screenPoint, float timeSec) {
 }
 
 void ofxScrollView::zoomTo(const ofVec2f & screenPoint, float zoom, float timeSec) {
-    bool bValid = animStart(timeSec);
-    if(bValid == false) {
-        return;
-    }
+    bool bAnimate = animStart(timeSec);
     
     scrollRectAnim0 = scrollRect;
     scrollRectAnim1 = scrollRect;
     scrollRectAnim1 = getRectZoomedAtScreenPoint(scrollRectAnim1, screenPoint, zoom);
     scrollRectAnim1 = getRectContainedInWindowRect(scrollRectAnim1);
+    
+    if(bAnimate == false) {
+        scrollRect = scrollRectEased = scrollRectAnim1;
+    }
 }
 
 void ofxScrollView::zoomToContentPointAndPositionAtScreenPoint(const ofVec2f & contentPoint,
                                                                const ofVec2f & screenPoint,
                                                                float zoom,
                                                                float timeSec) {
-    bool bValid = animStart(timeSec);
-    if(bValid == false) {
-        return;
-    }
+    bool bAnimate = animStart(timeSec);
 
     scrollRectAnim0 = scrollRect;
     scrollRectAnim1 = scrollRect;
     scrollRectAnim1 = getRectWithContentPointAtScreenPoint(scrollRectAnim1, contentPoint, screenPoint);
     scrollRectAnim1 = getRectZoomedAtScreenPoint(scrollRectAnim1, screenPoint, zoom);
     scrollRectAnim1 = getRectContainedInWindowRect(scrollRectAnim1);
+    
+    if(bAnimate == false) {
+        scrollRect = scrollRectEased = scrollRectAnim1;
+    }
 }
 
 void ofxScrollView::moveContentPointToScreenPoint(const ofVec2f & contentPoint,
                                                   const ofVec2f & screenPoint,
                                                   float timeSec) {
-    bool bValid = animStart(timeSec);
-    if(bValid == false) {
-        return;
-    }
+    bool bAnimate = animStart(timeSec);
 
     scrollRectAnim0 = scrollRect;
     scrollRectAnim1 = scrollRect;
     scrollRectAnim1 = getRectWithContentPointAtScreenPoint(scrollRectAnim1, contentPoint, screenPoint);
+    
+    if(bAnimate == false) {
+        scrollRect = scrollRectEased = scrollRectAnim1;
+    }
 }
 
 
@@ -863,11 +874,13 @@ void ofxScrollView::touchDoubleTap(int x, int y, int id) {
     float zoomCurrent = getZoom();
     float zoomTarget = 0.0;
     
-    if(isZoomedInMax() == true) {
-        zoomTarget = 0.0; // zoom all the way out.
+    bool bZoomedInMax = (zoomCurrent == doubleTapZoomRangeMax);
+    if(bZoomedInMax == true) {
+        zoomTarget = doubleTapZoomRangeMin; // zoom all the way out.
     } else {
-        zoomTarget = ofClamp(zoomCurrent + doubleTapZoomIncrement, 0.0, 1.0);
+        zoomTarget = zoomCurrent + doubleTapZoomIncrement;
     }
+    zoomTarget = ofClamp(zoomTarget, doubleTapZoomRangeMin, doubleTapZoomRangeMax);
     
     float zoomTimeSec = ABS(zoomTarget - zoomCurrent);
     zoomTimeSec *= doubleTapZoomIncrementTimeInSec;
