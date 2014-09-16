@@ -12,11 +12,12 @@
 class ofxScrollViewTouchPoint {
 public:
     ofxScrollViewTouchPoint() {
-        //
+        touchID = 0;
+        touchDownTimeInSec = 0;
     }
-    int touchID = 0;
+    int touchID;
     ofVec2f touchPos;
-    float touchDownTimeInSec = 0;
+    float touchDownTimeInSec;
 };
 
 //--------------------------------------------------------------
@@ -135,46 +136,46 @@ public:
     ofRectangle windowRect;
     ofRectangle contentRect;
     
-    bool bUserInteractionEnabled = false;
-    bool bPinchZoomEnabled = false;
+    bool bUserInteractionEnabled;
+    bool bPinchZoomEnabled;
 
     ofRectangle scrollRect;
     ofRectangle scrollRectEased;
     ofRectangle scrollRectAnim0;
     ofRectangle scrollRectAnim1;
-    float scrollEasing = 0.5;
-    float bounceBack = 1.0;
+    float scrollEasing;
+    float bounceBack;
     
     ofVec2f dragDownPos;
     ofVec2f dragMovePos;
     ofVec2f dragMovePosPrev;
     ofVec2f dragVel;
-    float dragVelDecay = 0.9;
-    bool bDragging = false;
+    float dragVelDecay;
+    bool bDragging;
     
     ofVec2f zoomDownPos;
     ofVec2f zoomMovePos;
     ofVec2f zoomMovePosPrev;
-    float zoomDownDist = 0;
-    float zoomMoveDist = 0;
-    bool bZooming = false;
+    float zoomDownDist;
+    float zoomMoveDist;
+    bool bZooming;
     
-    float animTimeStart = 0.0;
-    float animTimeTotal = 0.0;
-    bool bAnimating = false;
+    float animTimeStart;
+    float animTimeTotal;
+    bool bAnimating;
 
-    bool bDoubleTapZoomEnabled = false;
-    float doubleTapZoomRangeMin = 0.0;
-    float doubleTapZoomRangeMax = 1.0;
-    float doubleTapZoomIncrement = 1.0;
-    float doubleTapZoomIncrementTimeInSec = 0.2;
-    float doubleTapRegistrationTimeInSec = 0.25;
-    float doubleTapRegistrationDistanceInPixels = 22;
+    bool bDoubleTapZoomEnabled;
+    float doubleTapZoomRangeMin;
+    float doubleTapZoomRangeMax;
+    float doubleTapZoomIncrement;
+    float doubleTapZoomIncrementTimeInSec;
+    float doubleTapRegistrationTimeInSec;
+    float doubleTapRegistrationDistanceInPixels;
     
-    float scale = 1.0;
-    float scaleDown = 1.0;
-    float scaleMin = 1.0;
-    float scaleMax = 1.0;
+    float scale;
+    float scaleDown;
+    float scaleMin;
+    float scaleMax;
     ofMatrix4x4 mat;
     
     vector<ofxScrollViewTouchPoint> touchPoints;

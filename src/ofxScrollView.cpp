@@ -11,6 +11,37 @@ static float const kEasingStop = 0.001;
 
 //--------------------------------------------------------------
 ofxScrollView::ofxScrollView() {
+    
+    bUserInteractionEnabled = false;
+    bPinchZoomEnabled = false;
+    
+    scrollEasing = 0.5;
+    bounceBack = 1.0;
+    
+    dragVelDecay = 0.9;
+    bDragging = false;
+    
+    zoomDownDist = 0;
+    zoomMoveDist = 0;
+    bZooming = false;
+    
+    animTimeStart = 0.0;
+    animTimeTotal = 0.0;
+    bAnimating = false;
+    
+    bDoubleTapZoomEnabled = false;
+    doubleTapZoomRangeMin = 0.0;
+    doubleTapZoomRangeMax = 1.0;
+    doubleTapZoomIncrement = 1.0;
+    doubleTapZoomIncrementTimeInSec = 0.2;
+    doubleTapRegistrationTimeInSec = 0.25;
+    doubleTapRegistrationDistanceInPixels = 22;
+    
+    scale = 1.0;
+    scaleDown = 1.0;
+    scaleMin = 1.0;
+    scaleMax = 1.0;
+    
     setUserInteraction(true);
 #ifdef TARGET_OPENGLES
     setPinchZoom(true);
