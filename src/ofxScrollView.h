@@ -138,6 +138,7 @@ public:
     
     bool bUserInteractionEnabled;
     bool bPinchZoomEnabled;
+    bool bPinchZoomSupported;
 
     ofRectangle scrollRect;
     ofRectangle scrollRectEased;

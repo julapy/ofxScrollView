@@ -14,6 +14,7 @@ ofxScrollView::ofxScrollView() {
     
     bUserInteractionEnabled = false;
     bPinchZoomEnabled = false;
+    bPinchZoomSupported = false;
     
     scrollEasing = 0.5;
     bounceBack = 1.0;
@@ -43,10 +44,12 @@ ofxScrollView::ofxScrollView() {
     scaleMax = 1.0;
     
     setUserInteraction(true);
-#ifdef TARGET_OPENGLES
     setPinchZoom(true);
-#endif
     setDoubleTapZoom(true);
+    
+#ifdef TARGET_OPENGLES
+    bPinchZoomSupported = true;
+#endif
 }
 
 ofxScrollView::~ofxScrollView() {
@@ -474,7 +477,7 @@ void ofxScrollView::update() {
             float zoomRange = scaleMax - scaleMin;
             float zoomDiff = 0;
             
-            if(bPinchZoomEnabled == true) {
+            if(bPinchZoomSupported == true) {
                 
                 zoomDiff = zoomMoveDist - zoomDownDist;
                 zoomDiff *= 4;
@@ -715,6 +718,10 @@ void ofxScrollView::dragCancel() {
 
 //--------------------------------------------------------------
 void ofxScrollView::zoomDown(const ofVec2f & point, float pointDist) {
+    if(bPinchZoomEnabled == false) {
+        return;
+    }
+    
     zoomDownPos = zoomMovePos = zoomMovePosPrev = point;
     zoomDownDist = zoomMoveDist = pointDist;
     
@@ -725,11 +732,19 @@ void ofxScrollView::zoomDown(const ofVec2f & point, float pointDist) {
 }
 
 void ofxScrollView::zoomMoved(const ofVec2f & point, float pointDist) {
+    if(bPinchZoomEnabled == false) {
+        return;
+    }
+    
     zoomMovePos = point;
     zoomMoveDist = pointDist;
 }
 
 void ofxScrollView::zoomUp(const ofVec2f & point, float pointDist) {
+    if(bPinchZoomEnabled == false) {
+        return;
+    }
+    
     zoomMovePos = point;
     zoomMoveDist = pointDist;
     
