@@ -43,6 +43,8 @@ ofxScrollView::ofxScrollView() {
     scaleMin = 1.0;
     scaleMax = 1.0;
     
+    cropToWindowRect = false;
+
     setUserInteraction(true);
     setPinchZoom(true);
     setDoubleTapZoom(true);
@@ -205,6 +207,32 @@ void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
     scaleMin = MIN(scaleMin, 1.0);
     scaleMax = 1.0;
     scale = scaleMin;
+}
+
+//--------------------------------------------------------------
+bool ofxScrollView::getCropToWindowRect() {
+    return cropToWindowRect;
+}
+
+void ofxScrollView::setCropToWindowRect(bool bCrop) {
+    cropToWindowRect = bCrop;
+
+    if (bCrop)
+    {
+        /*
+         * Make sure our frame buffer is allocated and
+         * as large as our window rectangle.
+         */
+        frameBuffer.allocate(static_cast<int>(windowRect.width), static_cast<int>(windowRect.height));
+    }
+    else
+    {
+        /*
+         * We can destroy the frame buffer as we no
+         * longer need it.
+         */
+        frameBuffer.clear();
+    }
 }
 
 //--------------------------------------------------------------
@@ -674,12 +702,31 @@ ofVec2f ofxScrollView::getScreenPointAtContentPoint(const ofRectangle & rect,
 
 //--------------------------------------------------------------
 void ofxScrollView::begin() {
+    if (cropToWindowRect)
+    {
+        ofColor bg = ofGetBackgroundColor();
+        frameBuffer.begin();
+        ofClear(bg);
+    }
+
     ofPushMatrix();
     ofMultMatrix(mat);
+
 }
 
 void ofxScrollView::end() {
     ofPopMatrix();
+
+    if (cropToWindowRect)
+    {
+        frameBuffer.end();
+
+        /*
+         * Now, let's draw the relevant part of the
+         * frame buffer.
+         */
+        frameBuffer.draw(windowRect);
+     }
 }
 
 void ofxScrollView::draw() {
