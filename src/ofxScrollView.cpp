@@ -169,6 +169,8 @@ void ofxScrollView::reset() {
     
     scrollRect.width = scrollRectEased.width = contentRect.width * scale;
     scrollRect.height = scrollRectEased.height = contentRect.height * scale;
+    scrollRect.x = windowRect.x;
+    scrollRect.y = windowRect.y;
     scrollRect = scrollRectEased = getRectContainedInWindowRect(scrollRect);
     
     mat = getMatrixForRect(scrollRect);
