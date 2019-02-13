@@ -46,8 +46,37 @@ public:
     
     void setWindowRect(const ofRectangle & rect);
     void setContentRect(const ofRectangle & rect);
-    
+
+
+    /**
+     * @brief fitContentToWindow() - Scale the content area to fit the window area.
+     * @param aspectRatioMode
+     *
+     * The value of aspectRatioMode may be one of:
+     *
+     *   OF_ASPECT_RATIO_KEEP - Window rect completely contains all of content rect.
+     *                           Content is centered within thei window rect.
+     *
+     *   OF_ASPECT_RATIO_KEEP_BY_EXPANDING - Window rect is filled in one direction only.
+     *                                       Content may overflow window rect.
+     *
+     *   OF_ASPECT_RATIO_IGNORE - Has no effect.  This is the default mode.
+     */
     void fitContentToWindow(ofAspectRatioMode aspectRatioMode);
+
+    /**
+     * @brief getCropToWindowRect() - Returns true if we crop drawing to the Window Rect
+     * @return bool - true if we are cropping, false if we draw outside the Window Rect
+     */
+    bool getCropToWindowRect();
+
+    /**
+     * @brief setCropToWindowRect() - Sets the crop value.  True if we crop to the Window Rect, false to draw outside it.
+     * @param bCrop
+     *
+     * The initial setting of this is false, to be compatible with previous behaviour.
+     */
+    void setCropToWindowRect(bool bCrop);
 
     void setScale(float value);
     void setScaleMin(float value);
@@ -179,6 +208,9 @@ public:
     float scaleMax;
     ofMatrix4x4 mat;
     
+    bool cropToWindowRect;
+    ofFbo frameBuffer;
+
     vector<ofxScrollViewTouchPoint> touchPoints;
     ofxScrollViewTouchPoint touchDownPointLast;
     

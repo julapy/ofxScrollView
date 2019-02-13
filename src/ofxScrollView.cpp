@@ -43,6 +43,8 @@ ofxScrollView::ofxScrollView() {
     scaleMin = 1.0;
     scaleMax = 1.0;
     
+    cropToWindowRect = false;
+
     setUserInteraction(true);
     setPinchZoom(true);
     setDoubleTapZoom(true);
@@ -169,6 +171,8 @@ void ofxScrollView::reset() {
     
     scrollRect.width = scrollRectEased.width = contentRect.width * scale;
     scrollRect.height = scrollRectEased.height = contentRect.height * scale;
+    scrollRect.x = windowRect.x;
+    scrollRect.y = windowRect.y;
     scrollRect = scrollRectEased = getRectContainedInWindowRect(scrollRect);
     
     mat = getMatrixForRect(scrollRect);
@@ -205,6 +209,32 @@ void ofxScrollView::fitContentToWindow(ofAspectRatioMode aspectRatioMode) {
     scaleMin = MIN(scaleMin, 1.0);
     scaleMax = 1.0;
     scale = scaleMin;
+}
+
+//--------------------------------------------------------------
+bool ofxScrollView::getCropToWindowRect() {
+    return cropToWindowRect;
+}
+
+void ofxScrollView::setCropToWindowRect(bool bCrop) {
+    cropToWindowRect = bCrop;
+
+    if (bCrop)
+    {
+        /*
+         * Make sure our frame buffer is allocated and
+         * as large as our window rectangle.
+         */
+        frameBuffer.allocate(static_cast<int>(windowRect.width), static_cast<int>(windowRect.height));
+    }
+    else
+    {
+        /*
+         * We can destroy the frame buffer as we no
+         * longer need it.
+         */
+        frameBuffer.clear();
+    }
 }
 
 //--------------------------------------------------------------
@@ -647,7 +677,20 @@ ofMatrix4x4 ofxScrollView::getMatrixForRect(const ofRectangle & rect) {
     float rectScale = rect.width / contentRect.width;
     
     ofMatrix4x4 rectMat;
-    rectMat.preMultTranslate(ofVec3f(rect.x, rect.y, 0.0));
+    if (cropToWindowRect)
+    {
+        /*
+         * Because when we are cropping, we are always drawing
+         * relative to 0, 0, we need remove the offset effect
+         * of the window rect.
+         */
+        rectMat.preMultTranslate(ofVec3f(rect.x - windowRect.x, rect.y - windowRect.y, 0.0));
+    }
+    else
+    {
+        rectMat.preMultTranslate(ofVec3f(rect.x, rect.y, 0.0));
+    }
+
     rectMat.preMultScale(ofVec3f(rectScale, rectScale, 1.0));
     
     return rectMat;
@@ -674,12 +717,31 @@ ofVec2f ofxScrollView::getScreenPointAtContentPoint(const ofRectangle & rect,
 
 //--------------------------------------------------------------
 void ofxScrollView::begin() {
+    if (cropToWindowRect)
+    {
+        ofColor bg = ofGetBackgroundColor();
+        frameBuffer.begin();
+        ofClear(bg);
+    }
+
     ofPushMatrix();
     ofMultMatrix(mat);
+
 }
 
 void ofxScrollView::end() {
     ofPopMatrix();
+
+    if (cropToWindowRect)
+    {
+        frameBuffer.end();
+
+        /*
+         * Now, let's draw the relevant part of the
+         * frame buffer.
+         */
+        frameBuffer.draw(windowRect);
+     }
 }
 
 void ofxScrollView::draw() {
