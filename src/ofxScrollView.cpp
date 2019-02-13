@@ -677,7 +677,20 @@ ofMatrix4x4 ofxScrollView::getMatrixForRect(const ofRectangle & rect) {
     float rectScale = rect.width / contentRect.width;
     
     ofMatrix4x4 rectMat;
-    rectMat.preMultTranslate(ofVec3f(rect.x, rect.y, 0.0));
+    if (cropToWindowRect)
+    {
+        /*
+         * Because when we are cropping, we are always drawing
+         * relative to 0, 0, we need remove the offset effect
+         * of the window rect.
+         */
+        rectMat.preMultTranslate(ofVec3f(rect.x - windowRect.x, rect.y - windowRect.y, 0.0));
+    }
+    else
+    {
+        rectMat.preMultTranslate(ofVec3f(rect.x, rect.y, 0.0));
+    }
+
     rectMat.preMultScale(ofVec3f(rectScale, rectScale, 1.0));
     
     return rectMat;
