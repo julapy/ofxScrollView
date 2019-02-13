@@ -64,6 +64,19 @@ public:
      */
     void fitContentToWindow(ofAspectRatioMode aspectRatioMode);
 
+    /**
+     * @brief getCropToWindowRect() - Returns true if we crop drawing to the Window Rect
+     * @return bool - true if we are cropping, false if we draw outside the Window Rect
+     */
+    bool getCropToWindowRect();
+
+    /**
+     * @brief setCropToWindowRect() - Sets the crop value.  True if we crop to the Window Rect, false to draw outside it.
+     * @param bCrop
+     *
+     * The initial setting of this is false, to be compatible with previous behaviour.
+     */
+    void setCropToWindowRect(bool bCrop);
 
     void setScale(float value);
     void setScaleMin(float value);
@@ -195,6 +208,9 @@ public:
     float scaleMax;
     ofMatrix4x4 mat;
     
+    bool cropToWindowRect;
+    ofFbo frameBuffer;
+
     vector<ofxScrollViewTouchPoint> touchPoints;
     ofxScrollViewTouchPoint touchDownPointLast;
     
